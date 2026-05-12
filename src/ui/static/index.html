@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAGI Pipeline - 3D Video Converter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <img src="magi-text.png" alt="MAGI Logo" class="logo">
+                <div class="header-text">
+                    <h1>Pipeline</h1>
+                    <p class="subtitle">Convert videos to MAGI format - 120fps 4K 3D</p>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Mode Selection -->
+            <section class="mode-section">
+                <h2>Select Mode</h2>
+                <div class="mode-buttons">
+                    <button class="mode-btn active" data-mode="video" id="videoModeBtn">
+                        <svg class="mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        Video Processing
+                    </button>
+                    <button class="mode-btn" data-mode="game" id="gameModeBtn">
+                        <svg class="mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/>
+                        </svg>
+                        Game Capture
+                    </button>
+                    <button class="mode-btn" data-mode="camera" id="cameraModeBtn">
+                        <svg class="mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Camera Input
+                    </button>
+                </div>
+            </section>
+
+            <!-- Video Upload Section -->
+            <section class="upload-section" id="videoSection">
+                <h2>Upload Video</h2>
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="videoInput" accept="video/*" style="display: none;">
+                    <div class="upload-content">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        <p>Drag and drop your video here or click to browse</p>
+                        <p class="upload-hint">Supports MP4, AVI, MKV, MOV, WebM</p>
+                    </div>
+                </div>
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <span id="fileName"></span>
+                    <span id="fileSize"></span>
+                </div>
+            </section>
+
+            <!-- Game Capture Section -->
+            <section class="game-section" id="gameSection" style="display: none;">
+                <h2>Game Capture</h2>
+                
+                <div class="config-group">
+                    <label for="captureMethod">Capture Method</label>
+                    <select id="captureMethod">
+                        <option value="screen_capture">Screen Capture</option>
+                        <option value="window_capture">Window Capture</option>
+                        <option value="obs_websocket">OBS WebSocket</option>
+                        <option value="virtual_camera">Virtual Camera</option>
+                    </select>
+                </div>
+
+                <div class="config-group" id="windowSelectGroup" style="display: none;">
+                    <label for="windowSelect">Select Window</label>
+                    <select id="windowSelect">
+                        <option value="">Loading windows...</option>
+                    </select>
+                    <button class="btn-small" id="refreshWindowsBtn">Refresh</button>
+                </div>
+
+                <div class="config-group">
+                    <label for="pipelineMode">Pipeline Mode</label>
+                    <select id="pipelineMode">
+                        <option value="realtime">Realtime (Lowest Latency)</option>
+                        <option value="balanced" selected>Balanced (Recommended)</option>
+                        <option value="quality">Quality (Highest Quality)</option>
+                    </select>
+                </div>
+
+                <div class="game-controls">
+                    <button id="startCaptureBtn" class="btn-primary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Start Capture
+                    </button>
+                    <button id="stopCaptureBtn" class="btn-danger" disabled>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
+                        </svg>
+                        Stop Capture
+                    </button>
+                </div>
+
+                <div class="game-stats" id="gameStats" style="display: none;">
+                    <h3>Real-Time Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-label">FPS</span>
+                            <span class="stat-value" id="gameFps">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Latency</span>
+                            <span class="stat-value" id="gameLatency">0ms</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Frames</span>
+                            <span class="stat-value" id="gameFrames">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Dropped</span>
+                            <span class="stat-value" id="gameDropped">0</span>
+                        </div>
+                    </div>
+                    <div class="stats-breakdown">
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Capture:</span>
+                            <span class="breakdown-value" id="captureTime">0ms</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">3D Conversion:</span>
+                            <span class="breakdown-value" id="conversionTime">0ms</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Interpolation:</span>
+                            <span class="breakdown-value" id="interpolationTime">0ms</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Upscaling:</span>
+                            <span class="breakdown-value" id="upscalingTime">0ms</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Cadence:</span>
+                            <span class="breakdown-value" id="cadenceTime">0ms</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Camera Input Section -->
+            <section class="camera-section" id="cameraSection" style="display: none;">
+                <h2>Camera Input</h2>
+                
+                <div class="config-group">
+                    <label for="cameraSelect">Select Camera</label>
+                    <select id="cameraSelect">
+                        <option value="">Loading cameras...</option>
+                    </select>
+                    <button class="btn-small" id="refreshCamerasBtn">Refresh</button>
+                </div>
+
+                <div class="config-group">
+                    <label for="cameraProcessingMode">Processing Mode</label>
+                    <select id="cameraProcessingMode">
+                        <option value="realtime">Realtime (Lowest Latency)</option>
+                        <option value="balanced" selected>Balanced (Recommended)</option>
+                        <option value="quality">Quality (Highest Quality)</option>
+                    </select>
+                </div>
+
+                <div class="config-group">
+                    <label for="cameraOutputMode">Output Mode</label>
+                    <select id="cameraOutputMode">
+                        <option value="stream_only">Stream Only (Real-time viewing)</option>
+                        <option value="file_only">File Only (Save for archiving)</option>
+                        <option value="both" selected>Both (Stream + Save)</option>
+                    </select>
+                </div>
+
+                <div class="config-group" id="cameraOutputPathGroup" style="display: none;">
+                    <label for="cameraOutputPath">Output File Path</label>
+                    <input type="text" id="cameraOutputPath" placeholder="output.magi" value="output.magi">
+                </div>
+
+                <div class="camera-controls">
+                    <button id="startCameraBtn" class="btn-primary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Start Camera
+                    </button>
+                    <button id="stopCameraBtn" class="btn-danger" disabled>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
+                        </svg>
+                        Stop Camera
+                    </button>
+                </div>
+
+                <div class="camera-stats" id="cameraStats" style="display: none;">
+                    <h3>Real-Time Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-label">FPS</span>
+                            <span class="stat-value" id="cameraFps">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Latency</span>
+                            <span class="stat-value" id="cameraLatency">0ms</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Frames</span>
+                            <span class="stat-value" id="cameraFrames">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Dropped</span>
+                            <span class="stat-value" id="cameraDropped">0</span>
+                        </div>
+                    </div>
+                    <div class="stats-breakdown">
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Stereo Extraction:</span>
+                            <span class="breakdown-value" id="stereoExtractionTime">0ms</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Interpolation:</span>
+                            <span class="breakdown-value" id="cameraInterpolationTime">0ms</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Upscaling:</span>
+                            <span class="breakdown-value" id="cameraUpscalingTime">0ms</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Cadence:</span>
+                            <span class="breakdown-value" id="cameraCadenceTime">0ms</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Encoding:</span>
+                            <span class="breakdown-value" id="cameraEncodingTime">0ms</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Configuration Section -->
+            <section class="config-section">
+                <h2>Processing Configuration</h2>
+                
+                <div class="config-group">
+                    <label for="outputMode">Output Mode</label>
+                    <select id="outputMode">
+                        <option value="3d-projector">3D Projector</option>
+                        <option value="vr-headset">VR Headset</option>
+                        <option value="3d-tv">3D TV</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+
+                <div class="config-group">
+                    <label for="targetResolution">Target Resolution</label>
+                    <select id="targetResolution">
+                        <option value="3840x2160">4K (3840×2160)</option>
+                        <option value="2560x1440">2K (2560×1440)</option>
+                        <option value="1920x1080">Full HD (1920×1080)</option>
+                    </select>
+                </div>
+
+                <div class="config-group">
+                    <label for="targetFrameRate">Target Frame Rate</label>
+                    <select id="targetFrameRate">
+                        <option value="120" selected>120 fps (MAGI)</option>
+                        <option value="60">60 fps</option>
+                        <option value="30">30 fps</option>
+                    </select>
+                </div>
+
+                <div class="config-group">
+                    <label>
+                        <input type="checkbox" id="enableInterpolation" checked>
+                        Enable Frame Interpolation
+                    </label>
+                </div>
+
+                <div class="config-group">
+                    <label>
+                        <input type="checkbox" id="enableUpscaling" checked>
+                        Enable Upscaling
+                    </label>
+                </div>
+
+                <div class="config-group">
+                    <label>
+                        <input type="checkbox" id="enableStereoCrafter" checked>
+                        Use StereoCrafter for 2D to 3D
+                    </label>
+                </div>
+
+                <div class="config-group">
+                    <label for="interpolationMethod">Interpolation Method</label>
+                    <select id="interpolationMethod">
+                        <option value="optical_flow">Optical Flow</option>
+                        <option value="rife">RIFE (AI)</option>
+                        <option value="dain">DAIN (AI)</option>
+                    </select>
+                </div>
+
+                <div class="config-group">
+                    <label for="upscalingMethod">Upscaling Method</label>
+                    <select id="upscalingMethod">
+                        <option value="bicubic">Bicubic</option>
+                        <option value="lanczos">Lanczos</option>
+                        <option value="waifu2x">Waifu2x (AI)</option>
+                        <option value="realesrgan">RealESRGAN (AI)</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Process Button -->
+            <section class="action-section">
+                <button id="processBtn" class="btn-primary" disabled>
+                    <span class="btn-text">Process Video</span>
+                    <span class="btn-loader" style="display: none;"></span>
+                </button>
+            </section>
+
+            <!-- Progress Section -->
+            <section class="progress-section" id="progressSection" style="display: none;">
+                <h2>Processing Progress</h2>
+                
+                <!-- Pipeline Visualization -->
+                <div class="pipeline-visualization">
+                    <h3>Processing Pipeline</h3>
+                    <div class="pipeline-steps">
+                        <div class="pipeline-step" id="step-input">
+                            <div class="step-icon">📁</div>
+                            <div class="step-info">
+                                <div class="step-title">Input</div>
+                                <div class="step-status">Pending</div>
+                            </div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        
+                        <div class="pipeline-step" id="step-analyze">
+                            <div class="step-icon">🔍</div>
+                            <div class="step-info">
+                                <div class="step-title">Analyze</div>
+                                <div class="step-status">Pending</div>
+                            </div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        
+                        <div class="pipeline-step" id="step-3d">
+                            <div class="step-icon">👓</div>
+                            <div class="step-info">
+                                <div class="step-title">3D Conversion</div>
+                                <div class="step-status">Pending</div>
+                            </div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        
+                        <div class="pipeline-step" id="step-interpolate">
+                            <div class="step-icon">⚡</div>
+                            <div class="step-info">
+                                <div class="step-title">Interpolation</div>
+                                <div class="step-status">Pending</div>
+                            </div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        
+                        <div class="pipeline-step" id="step-upscale">
+                            <div class="step-icon">🔍</div>
+                            <div class="step-info">
+                                <div class="step-title">Upscaling</div>
+                                <div class="step-status">Pending</div>
+                            </div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        
+                        <div class="pipeline-step" id="step-cadence">
+                            <div class="step-icon">🔄</div>
+                            <div class="step-info">
+                                <div class="step-title">Frame Cadence</div>
+                                <div class="step-status">Pending</div>
+                            </div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        
+                        <div class="pipeline-step" id="step-encode">
+                            <div class="step-icon">💾</div>
+                            <div class="step-info">
+                                <div class="step-title">Encode</div>
+                                <div class="step-status">Pending</div>
+                            </div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        
+                        <div class="pipeline-step" id="step-output">
+                            <div class="step-icon">✅</div>
+                            <div class="step-info">
+                                <div class="step-title">Output</div>
+                                <div class="step-status">Pending</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-info">
+                        <span id="progressPercent">0%</span>
+                        <span id="progressStatus">Initializing...</span>
+                    </div>
+                </div>
+                
+                <!-- Progress Details -->
+                <div class="progress-details" id="progressDetails">
+                    <div class="detail-item">
+                        <span class="detail-label">Input:</span>
+                        <span class="detail-value" id="detailInput">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Output:</span>
+                        <span class="detail-value" id="detailOutput">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Mode:</span>
+                        <span class="detail-value" id="detailMode">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Current Step:</span>
+                        <span class="detail-value" id="currentStep">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h2>Processing Complete!</h2>
+                <div class="result-info">
+                    <p>Your video has been successfully converted to MAGI format.</p>
+                    <div class="result-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Output Resolution:</span>
+                            <span class="stat-value" id="resultResolution">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Frame Rate:</span>
+                            <span class="stat-value" id="resultFrameRate">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Processing Time:</span>
+                            <span class="stat-value" id="resultTime">-</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="downloadBtn" class="btn-success">
+                    Download Video
+                </button>
+                <button id="resetBtn" class="btn-secondary">
+                    Process Another Video
+                </button>
+            </section>
+        </main>
+
+        <footer>
+            <p>MAGI Pipeline v0.1.0 | Converting videos to immersive 3D experiences</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

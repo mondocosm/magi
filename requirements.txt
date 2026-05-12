@@ -1,0 +1,64 @@
+# Core dependencies
+opencv-python>=4.8.0
+numpy>=1.24.0
+ffmpeg-python>=0.2.0
+
+# AI/ML frameworks
+torch>=2.0.0
+torchvision>=0.15.0
+onnxruntime-gpu>=1.15.0
+
+# Web framework for API and UI
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+pydantic>=2.0.0
+python-multipart>=0.0.6
+
+# Async support
+asyncio>=3.4.3
+aiofiles>=23.0.0
+
+# Configuration and utilities
+PyYAML>=6.0
+python-dotenv>=1.0.0
+click>=8.1.0
+rich>=13.0.0
+
+# Image processing
+Pillow>=10.0.0
+imageio>=2.31.0
+scikit-image>=0.21.0
+
+# Video processing
+moviepy>=1.0.3
+av>=11.0.0
+
+# GPU acceleration
+vulkan>=1.2.0
+pyopencl>=2023.1
+
+# Game capture
+mss>=9.0.0
+pygetwindow>=0.0.9
+obsws-python>=1.0.0
+
+# Cloud GPU integration
+requests>=2.31.0
+
+# Progress bars and logging
+tqdm>=4.65.0
+loguru>=0.7.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+
+# Development tools
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.4.0
+
+# Optional: For enhanced upscaling
+# waifu2x-ncnn-vulkan (install separately)
+# realsr-ncnn-vulkan (install separately)

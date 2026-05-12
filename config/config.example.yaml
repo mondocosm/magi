@@ -1,0 +1,171 @@
+# MAGI Pipeline Configuration
+
+# Processing settings
+processing:
+  # Target output specifications
+  target:
+    resolution: "3840x2160"  # 4K per eye
+    frame_rate: 120  # 120 fps total (60 fps per eye)
+    format: "magi"  # MAGI format with alternating frames
+  
+  # Frame interpolation settings
+  interpolation:
+    enabled: true
+    method: "rife"  # Options: rife, dain, optical_flow
+    quality: "high"  # Options: low, medium, high
+    gpu_acceleration: true
+  
+  # Upscaling settings
+  upscaling:
+    enabled: true
+    method: "waifu2x"  # Options: waifu2x, realesrgan, anime4k
+    model: "photo-normal"  # Model selection
+    gpu_acceleration: true
+  
+  # 3D processing settings
+  processing_3d:
+    enabled: true
+    input_format: "auto"  # Options: auto, sbs, tab, frame_sequential
+    output_format: "sbs"  # Side-by-side for MAGI
+    depth_estimation: true  # For 2D to 3D conversion
+    use_stereocrafter: true  # Use StereoCrafter for high-quality 2D to 3D conversion
+    stereocrafter_path: "../StereoCrafter"  # Path to StereoCrafter directory
+    stereocrafter_max_disp: 20  # Maximum disparity for depth-based splatting
+
+# GPU settings
+gpu:
+  # Preferred GPU backend
+  backend: "auto"  # Options: auto, cuda, vulkan, metal
+  
+  # CUDA settings (NVIDIA)
+  cuda:
+    device_id: 0  # GPU device ID
+    allow_growth: true  # Memory allocation
+  
+  # Vulkan settings (Cross-platform)
+  vulkan:
+    device_id: 0  # GPU device ID
+  
+  # Memory management
+  memory:
+    max_memory_gb: 8  # Maximum GPU memory to use
+    buffer_size: 4  # Number of frames to buffer
+
+# Performance settings
+performance:
+  # Threading
+  threads: 4  # Number of CPU threads
+  
+  # Buffer management
+  buffer_size: 8  # Frame buffer size
+  
+  # Real-time processing
+  real_time: true
+  max_latency_ms: 100  # Maximum allowed latency
+  
+  # Quality vs speed trade-off
+  quality_mode: "balanced"  # Options: speed, balanced, quality
+
+# Input settings
+input:
+  # Supported formats
+  formats:
+    - mp4
+    - avi
+    - mkv
+    - mov
+    - webm
+  
+  # 3D format detection
+  auto_detect_3d: true
+  
+  # Frame rate handling
+  preserve_audio: true
+  preserve_metadata: true
+
+# Output settings
+output:
+  # Output format
+  container: "mp4"  # Options: mp4, mkv, avi
+  
+  # Video codec
+  video_codec: "hevc"  # Options: hevc, h264, av1
+  
+  # Audio codec
+  audio_codec: "aac"  # Options: aac, opus, flac
+  
+  # Quality settings
+  quality:
+    video_bitrate: "50000k"  # 50 Mbps for 4K
+    audio_bitrate: "320k"  # 320 kbps for audio
+    crf: 18  # Constant rate factor (lower = better quality)
+  
+  # MAGI-specific settings
+  magi:
+    frame_cadence: "alternating"  # Alternating left/right frames
+    eye_separation: 180  # 180 degrees out of phase
+    sync_method: "hardware"  # Options: hardware, software
+
+# UI settings
+ui:
+  # Web interface
+  web:
+    enabled: true
+    host: "0.0.0.0"
+    port: 8000
+    debug: false
+  
+  # GUI settings
+  gui:
+    theme: "dark"  # Options: light, dark
+    language: "en"
+    show_preview: true
+    preview_quality: "medium"
+
+# Logging settings
+logging:
+  level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR
+  file: "logs/magipipeline.log"
+  console: true
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Cloud processing (optional)
+cloud:
+  enabled: false
+  provider: "aws"  # Options: aws, gcp, azure
+  region: "us-east-1"
+  instance_type: "p3.2xlarge"  # GPU instance
+  
+# Paths
+paths:
+  # Model directories
+  models_dir: "models"
+  
+  # Temporary directories
+  temp_dir: "temp"
+  cache_dir: "cache"
+  
+  # Output directories
+  output_dir: "output"
+  
+  # External tools
+  bino_path: "../bino"
+  waifu2x_path: "../Waifu2x-Extension-GUI"
+
+# Advanced settings
+advanced:
+  # Frame processing
+  frame_processing:
+    batch_size: 1  # Frames to process at once
+    overlap: 0  # Frame overlap for temporal consistency
+  
+  # Memory optimization
+  memory_optimization:
+    enabled: true
+    swap_threshold: 0.8  # Swap to disk when memory usage exceeds 80%
+  
+  # Error handling
+  error_handling:
+    retry_attempts: 3
+    retry_delay: 1  # seconds
+    continue_on_error: false
