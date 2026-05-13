@@ -119,6 +119,14 @@ class WebUI:
                 return FileResponse(str(logo_file), media_type="image/png")
             return {"error": "Logo file not found"}
         
+        @self.app.get("/about.html")
+        async def get_about():
+            """Serve about page"""
+            about_file = static_dir / "about.html"
+            if about_file.exists():
+                return FileResponse(str(about_file), media_type="text/html")
+            return {"error": "About page not found"}
+        
         @self.app.get("/api/config")
         async def get_config():
             """Get current configuration"""

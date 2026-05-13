@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About MAGI - Douglas Trumbull's Revolutionary 3D Cinema System</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .about-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .about-section {
+            margin-bottom: 50px;
+        }
+        
+        .about-section h2 {
+            color: #ffffff;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #404040;
+            padding-bottom: 10px;
+        }
+        
+        .about-section h3 {
+            color: #cccccc;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        
+        .about-section p {
+            color: #cccccc;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            margin: 30px 0;
+            background: #2d2d2d;
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #3d3d3d;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .specs-table th,
+        .specs-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #4d4d4d;
+        }
+        
+        .specs-table th {
+            background: #4d4d4d;
+            color: #ffffff;
+            font-weight: 600;
+            width: 40%;
+        }
+        
+        .specs-table td {
+            color: #cccccc;
+        }
+        
+        .specs-table tr:last-child th,
+        .specs-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature-card {
+            background: #3d3d3d;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #4d4d4d;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            border-color: #ffffff;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-card h4 {
+            color: #ffffff;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .feature-card p {
+            color: #cccccc;
+            font-size: 0.95em;
+            margin: 0;
+        }
+        
+        .quote-box {
+            background: #4d4d4d;
+            padding: 30px;
+            border-radius: 12px;
+            border-left: 4px solid #ffffff;
+            margin: 30px 0;
+        }
+        
+        .quote-box p {
+            color: #ffffff;
+            font-style: italic;
+            font-size: 1.1em;
+            margin: 0;
+        }
+        
+        .quote-box cite {
+            display: block;
+            margin-top: 15px;
+            color: #cccccc;
+            font-style: normal;
+            font-size: 0.9em;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 20px;
+            border: 2px solid #ffffff;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+        
+        .back-link:hover {
+            background: #ffffff;
+            color: #1a1a1a;
+            transform: translateX(-5px);
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin: 30px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #4d4d4d;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+            padding-left: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -34px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            background: #ffffff;
+            border-radius: 50%;
+        }
+        
+        .timeline-item h4 {
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-item p {
+            color: #cccccc;
+            margin: 0;
+            font-size: 0.95em;
+        }
+        
+        @media (max-width: 768px) {
+            .about-link {
+                position: static;
+                transform: none;
+                margin-top: 15px;
+            }
+            
+            .about-link:hover {
+                transform: scale(1.05);
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <img src="magi-text.png" alt="MAGI Logo" class="logo">
+                <div class="header-text">
+                    <h1>About MAGI</h1>
+                    <p class="subtitle">Douglas Trumbull's Revolutionary 3D Cinema System</p>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="about-content">
+                <a href="index.html" class="back-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Back to Pipeline
+                </a>
+
+                <!-- Introduction -->
+                <section class="about-section">
+                    <h2>What is MAGI?</h2>
+                    <p>
+                        MAGI (Maximum Immersion Graphics Interface) is a revolutionary high-frame-rate 3D cinema system developed by legendary filmmaker and visual effects pioneer <strong>Douglas Trumbull</strong>. Known for his groundbreaking work on films like <em>2001: A Space Odyssey</em>, <em>Close Encounters of the Third Kind</em>, and <em>Blade Runner</em>, Trumbull created MAGI to deliver an unprecedented level of visual immersion.
+                    </p>
+                    <p>
+                        The MAGI system eliminates the visual artifacts and motion blur that plague traditional cinema, creating a viewing experience that feels more like looking through a window than watching a screen. By combining ultra-high frame rates with 3D projection, MAGI delivers crystal-clear motion with no blur or judder, enhanced depth perception through precise 3D alignment, reduced eye strain compared to conventional 3D systems, and unprecedented immersion that makes viewers feel part of the scene.
+                    </p>
+                </section>
+
+                <!-- Video Section -->
+                <section class="about-section">
+                    <h2>The MAGI Process Explained</h2>
+                    <p>
+                        Watch Douglas Trumbull explain the MAGI process and its revolutionary approach to cinema:
+                    </p>
+                    <div class="video-container">
+                        <iframe 
+                            src="https://www.youtube.com/embed/JhbFrkCJ_nA" 
+                            title="MAGI Process Explained by Douglas Trumbull"
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                </section>
+
+                <!-- Technical Specifications -->
+                <section class="about-section">
+                    <h2>MAGI Technical Specifications</h2>
+                    <table class="specs-table">
+                        <tr>
+                            <th>Frame Rate</th>
+                            <td>120 fps (60 fps per eye)</td>
+                        </tr>
+                        <tr>
+                            <th>Resolution</th>
+                            <td>4K per eye (3840×2160)</td>
+                        </tr>
+                        <tr>
+                            <th>3D Format</th>
+                            <td>Frame-sequential with 180° phase separation</td>
+                        </tr>
+                        <tr>
+                            <th>Capture</th>
+                            <td>100% action shooting at 120 fps</td>
+                        </tr>
+                        <tr>
+                            <th>Projection</th>
+                            <td>Alternating left/right eye frames</td>
+                        </tr>
+                        <tr>
+                            <th>Codec</th>
+                            <td>HEVC H.265</td>
+                        </tr>
+                        <tr>
+                            <th>Container</th>
+                            <td>Matroska (MKV) with .magi extension</td>
+                        </tr>
+                    </table>
+                </section>
+
+                <!-- Understanding Frame Rate -->
+                <section class="about-section">
+                    <h2>Understanding Frame Rate Conversion</h2>
+                    <p>
+                        Traditional cinema runs at 24 frames per second, which creates noticeable motion blur and judder, especially during fast action sequences. MAGI's 120 fps provides 5x more temporal information, resulting in smoother motion with no blur or stuttering, better detail with each frame being razor-sharp, and enhanced realism that's closer to human vision.
+                    </p>
+                    <p>
+                        The conversion process involves sophisticated frame interpolation algorithms that generate intermediate frames between existing frames, creating smooth motion that wasn't present in the original footage. This is particularly important for content shot at lower frame rates like 24 fps (film) or 30 fps (video).
+                    </p>
+                </section>
+
+                <!-- Key Features -->
+                <section class="about-section">
+                    <h2>Key MAGI Features</h2>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>🎬 Crystal-Clear Motion</h4>
+                            <p>No blur or judder with 120 fps frame rate</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>👓 Enhanced Depth</h4>
+                            <p>Precise 3D alignment for maximum immersion</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>😌 Reduced Eye Strain</h4>
+                            <p>More comfortable than conventional 3D systems</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🌟 Unprecedented Immersion</h4>
+                            <p>Feel like you're part of the scene</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📺 4K Resolution</h4>
+                            <p>Ultra-high definition per eye</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>⚡ Real-Time Processing</h4>
+                            <p>Near real-time conversion with GPU acceleration</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Douglas Trumbull -->
+                <section class="about-section">
+                    <h2>Douglas Trumbull: The Visionary</h2>
+                    <p>
+                        Douglas Trumbull (1942-2022) was a visual effects pioneer who revolutionized cinema. His innovations have influenced generations of filmmakers and visual effects artists, and MAGI represents the culmination of his lifelong pursuit of perfect visual immersion.
+                    </p>
+                    
+                    <h3>Career Highlights</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <h4>1968 - 2001: A Space Odyssey</h4>
+                            <p>Revolutionary slit-scan photography and miniature effects</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>1977 - Close Encounters of the Third Kind</h4>
+                            <p>Special photographic effects and UFO sequences</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>1982 - Blade Runner</h4>
+                            <p>Visual effects supervision and iconic cityscapes</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>1983 - Showscan</h4>
+                            <p>70mm film at 60 fps (precursor to MAGI)</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4>2010s - MAGI</h4>
+                            <p>Final and most ambitious project: 120 fps 3D cinema</p>
+                        </div>
+                    </div>
+                    
+                    <div class="quote-box">
+                        <p>"The goal of MAGI is to create an experience that's so immersive, you forget you're watching a movie."</p>
+                        <cite>— Douglas Trumbull</cite>
+                    </div>
+                </section>
+
+                <!-- MAGI Pipeline Software -->
+                <section class="about-section">
+                    <h2>About MAGI Pipeline Software</h2>
+                    <p>
+                        MAGI Pipeline is an open-source software solution that brings the power of MAGI conversion to everyone. Our mission is to democratize access to this groundbreaking technology, allowing filmmakers, content creators, and enthusiasts to convert any video content to MAGI format.
+                    </p>
+                    
+                    <h3>Who Can Use MAGI Pipeline?</h3>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h4>🎥 Filmmakers</h4>
+                            <p>Convert existing footage to MAGI format</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🎮 Game Developers</h4>
+                            <p>Capture and convert gameplay to MAGI</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🥽 VR/AR Creators</h4>
+                            <p>Create immersive 3D content</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📺 Content Distributors</h4>
+                            <p>Prepare content for MAGI theaters</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🏠 Home Theater</h4>
+                            <p>Experience cinema-quality 3D at home</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🔬 Researchers</h4>
+                            <p>Study high-frame-rate video processing</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- The Future of MAGI -->
+                <section class="about-section">
+                    <h2>The Future of MAGI</h2>
+                    <p>
+                        MAGI Pipeline is committed to advancing the MAGI format and making it accessible to everyone. Our roadmap includes enhanced AI models for better interpolation and upscaling, real-time streaming for live MAGI content delivery, mobile support for MAGI playback on mobile devices, cloud services for fully managed MAGI conversion, community tools including plugins for popular video editors, and hardware integration with dedicated MAGI conversion hardware.
+                    </p>
+                </section>
+
+                <!-- Get Involved -->
+                <section class="about-section">
+                    <h2>Get Involved</h2>
+                    <p>
+                        MAGI Pipeline is an open-source project, and we welcome contributions from the community. You can help us improve the software by reporting issues, submitting pull requests, sharing your work with MAGI, and helping others discover this revolutionary technology.
+                    </p>
+                    <p>
+                        <strong>GitHub Repository:</strong> <a href="https://github.com/mondocosm/magi" style="color: #ffffff;">https://github.com/mondocosm/magi</a>
+                    </p>
+                </section>
+
+                <!-- License -->
+                <section class="about-section">
+                    <h2>License</h2>
+                    <p>
+                        MAGI Pipeline is released under the MIT License, allowing free use, modification, and distribution.
+                    </p>
+                </section>
+            </div>
+        </main>
+
+        <footer>
+            <p>MAGI Pipeline v0.1.0 | Converting videos to immersive 3D experiences</p>
+            <p style="margin-top: 10px; font-size: 0.85em; color: #999999;">
+                Honoring the vision of Douglas Trumbull (1942-2022)
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
