@@ -1,0 +1,256 @@
+# macOS Build Configuration for MAGI Pipeline
+# This configuration is optimized for macOS platforms
+
+# Build Method
+build_method: nuitka  # Options: nuitka, pyinstaller
+
+# Nuitka Configuration
+nuitka:
+  # Compiler Settings
+  compiler: clang  # macOS uses Clang by default
+  
+  # Optimization
+  lto: true  # Link-time optimization
+  jobs: 4  # Number of parallel jobs (use available cores)
+  
+  # Output Settings
+  standalone: true
+  onefile: false  # macOS prefers app bundles
+  
+  # macOS-specific
+  create_app_bundle: true
+  icon: src/ui/static/magi-icon.icns
+  
+  # Performance
+  follow_imports: true
+  include_modules:
+    - src.pipeline.controller
+    - src.input.video_input
+    - src.input.game_capture
+    - src.input.camera_capture
+    - src.processing.interpolation
+    - src.processing.upscaling
+    - src.processing.frame_cadence
+    - src.processing.processing_3d
+    - src.output.magi_encoder
+    - cv2
+    - numpy
+    - fastapi
+    - uvicorn
+  
+  # Data Files
+  include_data_dirs:
+    - src/ui/static=src/ui/static
+    - config=config
+  
+  # Exclusions (reduce bundle size)
+  exclude_modules:
+    - tkinter
+    - matplotlib
+    - pandas
+    - scipy
+    - ipython
+    - jupyter
+
+# PyInstaller Configuration (fallback)
+pyinstaller:
+  # Output Settings
+  onefile: false  # macOS prefers app bundles
+  console: false
+  icon: src/ui/static/magi-icon.icns
+  
+  # Data Files
+  datas:
+    - src/ui/static;src/ui/static
+    - config;config
+  
+  # Hidden Imports
+  hiddenimports:
+    - cv2
+    - numpy
+    - fastapi
+    - uvicorn
+    - pydantic
+    - src.pipeline.controller
+    - src.input.video_input
+    - src.processing.interpolation
+    - src.processing.upscaling
+    - src.processing.frame_cadence
+    - src.output.magi_encoder
+  
+  # Exclusions
+  excludes:
+    - tkinter
+    - matplotlib
+    - pandas
+    - scipy
+  
+  # Optimization
+  upx: true
+  strip: false
+
+# macOS-specific Settings
+macos:
+  # Supported macOS Versions
+  min_version: "10.15"  # macOS Catalina (10.15)+
+  target_version: "13.0"  # macOS Ventura (13.0)+
+  
+  # Architecture
+  architectures:
+    - universal2  # Universal binary (Intel + Apple Silicon)
+    - arm64  # Apple Silicon only
+    - x86_64  # Intel only
+  
+  # GPU Support
+  gpu_support:
+    - metal  # Apple Metal (Apple Silicon)
+    - opengl  # OpenGL (Intel)
+  
+  # Camera Support
+  camera_support:
+    - avfoundation  # AVFoundation API
+    - qtkit  # QTKit API (deprecated)
+  
+  # Game Capture
+  game_capture:
+    - screen_capture_kit  # ScreenCaptureKit API (macOS 12.3+)
+    - cg_display_stream  # CGDisplayStream API
+  
+  # App Bundle Settings
+  app_bundle:
+    bundle_identifier: "com.magi.pipeline"
+    bundle_name: "MAGI Pipeline"
+    bundle_version: "0.1.0"
+    bundle_short_version: "0.1.0"
+    bundle_category: "public.app-category.video"
+    
+    # Info.plist settings
+    info_plist:
+      NSHighResolutionCapable: true
+      NSRequiresAquaSystemAppearance: false
+      LSMinimumSystemVersion: "10.15"
+      NSCameraUsageDescription: "MAGI Pipeline needs camera access for video capture"
+      NSMicrophoneUsageDescription: "MAGI Pipeline needs microphone access for audio capture"
+      NSScreenCaptureDescription: "MAGI Pipeline needs screen recording permission for game capture"
+  
+  # Installer Settings
+  installer:
+    tool: pkgbuild  # Options: pkgbuild, productsign
+    create_installer: true
+    install_location: "/Applications"
+    sign_package: false  # Set to true for distribution
+    
+    # Code Signing (optional)
+    code_signing:
+      enabled: false
+      identity: ""  # Developer ID Application
+      entitlements: ""
+      provisioning_profile: ""
+  
+  # Notarization (required for distribution)
+  notarization:
+    enabled: false
+    apple_id: ""
+    password: ""  # App-specific password
+    team_id: ""
+
+# Performance Optimization
+performance:
+  # GPU Acceleration
+  gpu_acceleration: true
+  metal_version: "2.3"  # Minimum Metal version
+  
+  # CPU Optimization
+  cpu_optimization: true
+  neon_support: true  # ARM NEON instructions
+  avx_support: true  # AVX/AVX2 instructions (Intel)
+  
+  # Memory Optimization
+  memory_optimization: true
+  memory_fraction: 0.8  # Use 80% of available GPU memory
+  
+  # Apple Silicon Optimization
+  apple_silicon:
+    unified_memory: true
+    neural_engine: true  # Use ANE for AI models
+
+# Dependencies
+dependencies:
+  # Python Version
+  python_version: "3.9"  # Minimum Python version
+  
+  # System Dependencies
+  system:
+    - "Xcode Command Line Tools"
+    - "Python 3.9+"
+  
+  # Python Dependencies
+  python:
+    - opencv-python
+    - numpy
+    - fastapi
+    - uvicorn
+    - python-multipart
+    - pydantic
+    - torch  # For AI models
+    - torchvision  # For AI models
+
+# Testing
+testing:
+  # Test on macOS Versions
+  test_versions:
+    - "macOS 10.15 (Catalina)"
+    - "macOS 11.0 (Big Sur)"
+    - "macOS 12.0 (Monterey)"
+    - "macOS 13.0 (Ventura)"
+  
+  # Test Architectures
+  test_architectures:
+    - "Apple Silicon (M1/M2)"
+    - "Intel (x86_64)"
+    - "Universal Binary"
+  
+  # Test GPU Configurations
+  test_gpus:
+    - "Apple M1 (8-core GPU)"
+    - "Apple M1 Pro (14-core GPU)"
+    - "Apple M1 Max (24-core GPU)"
+    - "Apple M2 (8-core GPU)"
+    - "Apple M2 Pro (16-core GPU)"
+    - "Apple M2 Max (30-core GPU)"
+    - "Intel Iris Plus Graphics"
+    - "Intel Iris Pro Graphics"
+    - "AMD Radeon Pro"
+
+# Build Matrix
+build_matrix:
+  # Python Versions
+  python_versions:
+    - "3.9"
+    - "3.10"
+    - "3.11"
+  
+  # Architectures
+  architectures:
+    - "universal2"
+    - "arm64"
+    - "x86_64"
+  
+  # Build Types
+  build_types:
+    - "release"  # Optimized release build
+    - "debug"  # Debug build with symbols
+
+# Version Tracking
+version:
+  current: "0.1.0"
+  config_version: "1.0.0"
+  last_updated: "2024-01-01"
+  
+  # Compatibility Matrix
+  compatibility:
+    "0.1.0":
+      macos_min: "10.15"
+      macos_max: "13.0"
+      python_min: "3.9"
+      python_max: "3.11"

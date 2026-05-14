@@ -1,0 +1,414 @@
+# Linux Build Configuration for MAGI Pipeline
+# This configuration is optimized for Linux platforms
+
+# Build Method
+build_method: nuitka  # Options: nuitka, pyinstaller
+
+# Nuitka Configuration
+nuitka:
+  # Compiler Settings
+  compiler: gcc  # Options: gcc, clang
+  
+  # Optimization
+  lto: true  # Link-time optimization
+  jobs: 4  # Number of parallel jobs (use available cores)
+  
+  # Output Settings
+  standalone: true
+  onefile: true
+  
+  # Linux-specific
+  icon: src/ui/static/magi-icon.png
+  
+  # Performance
+  follow_imports: true
+  include_modules:
+    - src.pipeline.controller
+    - src.input.video_input
+    - src.input.game_capture
+    - src.input.camera_capture
+    - src.processing.interpolation
+    - src.processing.upscaling
+    - src.processing.frame_cadence
+    - src.processing.processing_3d
+    - src.output.magi_encoder
+    - cv2
+    - numpy
+    - fastapi
+    - uvicorn
+  
+  # Data Files
+  include_data_dirs:
+    - src/ui/static=src/ui/static
+    - config=config
+  
+  # Exclusions (reduce bundle size)
+  exclude_modules:
+    - tkinter
+    - matplotlib
+    - pandas
+    - scipy
+    - ipython
+    - jupyter
+
+# PyInstaller Configuration (fallback)
+pyinstaller:
+  # Output Settings
+  onefile: true
+  console: false
+  icon: src/ui/static/magi-icon.png
+  
+  # Data Files
+  datas:
+    - src/ui/static;src/ui/static
+    - config;config
+  
+  # Hidden Imports
+  hiddenimports:
+    - cv2
+    - numpy
+    - fastapi
+    - uvicorn
+    - pydantic
+    - src.pipeline.controller
+    - src.input.video_input
+    - src.processing.interpolation
+    - src.processing.upscaling
+    - src.processing.frame_cadence
+    - src.output.magi_encoder
+  
+  # Exclusions
+  excludes:
+    - tkinter
+    - matplotlib
+    - pandas
+    - scipy
+  
+  # Optimization
+  upx: true
+  strip: false
+
+# Linux-specific Settings
+linux:
+  # Supported Linux Distributions
+  distributions:
+    - "Ubuntu 20.04 LTS"
+    - "Ubuntu 22.04 LTS"
+    - "Debian 11 (Bullseye)"
+    - "Debian 12 (Bookworm)"
+    - "Fedora 37"
+    - "Fedora 38"
+    - "Arch Linux"
+    - "openSUSE Tumbleweed"
+    - "CentOS 8 Stream"
+    - "Rocky Linux 8"
+  
+  # Minimum Kernel Version
+  min_kernel: "5.4"  # Linux 5.4+
+  
+  # GPU Support
+  gpu_support:
+    - cuda  # NVIDIA CUDA
+    - rocm  # AMD ROCm
+    - vulkan  # Vulkan API
+    - opengl  # OpenGL
+  
+  # Camera Support
+  camera_support:
+    - v4l2  # Video4Linux2 API
+    - libcamera  # libcamera API (newer)
+  
+  # Game Capture
+  game_capture:
+    - x11_capture  # X11 screen capture
+    - pipewire  # PipeWire (Wayland)
+    - kms  # Kernel Mode Setting (DRM)
+  
+  # Package Formats
+  package_formats:
+    - appimage  # AppImage (universal)
+    - deb  # Debian/Ubuntu
+    - rpm  # Fedora/RHEL/CentOS
+    - arch  # Arch Linux (PKGBUILD)
+    - tarball  # Generic tarball
+  
+  # AppImage Settings
+  appimage:
+    create_appimage: true
+    appdir_name: "MAGI-Pipeline.AppDir"
+    appimage_name: "MAGI-Pipeline"
+    
+    # AppImage Tool
+    appimagetool_version: "continuous"
+    
+    # Desktop File
+    desktop_file:
+      name: "MAGI Pipeline"
+      comment: "Convert videos to MAGI format - 120fps 4K 3D"
+      exec: "AppRun"
+      icon: "icon"
+      terminal: false
+      type: "Application"
+      categories:
+        - "AudioVideo"
+        - "Video"
+  
+  # DEB Package Settings
+  deb:
+    create_deb: true
+    package_name: "magi-pipeline"
+    maintainer: "MAGI Project <info@magi-project.org>"
+    section: "video"
+    priority: "optional"
+    depends:
+      - "python3 (>= 3.9)"
+      - "libopencv-dev"
+      - "libgl1-mesa-glx"
+      - "libglib2.0-0"
+    recommends:
+      - "nvidia-cuda-toolkit (for NVIDIA GPUs)"
+      - "rocm-dev (for AMD GPUs)"
+  
+  # RPM Package Settings
+  rpm:
+    create_rpm: true
+    package_name: "magi-pipeline"
+    vendor: "MAGI Project"
+    license: "MIT"
+    group: "Applications/Multimedia"
+    requires:
+      - "python3 >= 3.9"
+      - "opencv-devel"
+      - "mesa-libGL"
+      - "glib2"
+    suggests:
+      - "cuda-devel (for NVIDIA GPUs)"
+      - "rocm-devel (for AMD GPUs)"
+  
+  # Arch Linux Package Settings
+  arch:
+    create_pkgbuild: true
+    pkgname: "magi-pipeline"
+    pkgver: "0.1.0"
+    pkgrel: "1"
+    pkgdesc: "Convert videos to MAGI format - 120fps 4K 3D"
+    arch:
+      - "x86_64"
+      - "aarch64"
+    depends:
+      - "python>=3.9"
+      - "opencv"
+      - "mesa"
+      - "glib2"
+    optdepends:
+      - "cuda: NVIDIA GPU support"
+      - "rocm: AMD GPU support"
+    license:
+      - "MIT"
+
+# Performance Optimization
+performance:
+  # GPU Acceleration
+  gpu_acceleration: true
+  cuda_version: "12.0"  # Minimum CUDA version
+  rocm_version: "5.0"  # Minimum ROCm version
+  
+  # CPU Optimization
+  cpu_optimization: true
+  avx_support: true  # AVX/AVX2 instructions
+  neon_support: true  # ARM NEON instructions
+  
+  # Memory Optimization
+  memory_optimization: true
+  memory_fraction: 0.8  # Use 80% of available GPU memory
+  
+  # SIMD Optimization
+  simd:
+    - "SSE4.2"
+    - "AVX"
+    - "AVX2"
+    - "AVX-512"
+    - "NEON"  # ARM
+
+# Dependencies
+dependencies:
+  # Python Version
+  python_version: "3.9"  # Minimum Python version
+  
+  # System Dependencies
+  system:
+    - "Python 3.9+"
+    - "GCC 9+ or Clang 10+"
+    - "OpenGL libraries"
+    - "Vulkan libraries (optional)"
+  
+  # Python Dependencies
+  python:
+    - opencv-python
+    - numpy
+    - fastapi
+    - uvicorn
+    - python-multipart
+    - pydantic
+    - torch  # For AI models
+    - torchvision  # For AI models
+
+# Testing
+testing:
+  # Test on Linux Distributions
+  test_distributions:
+    - "Ubuntu 20.04 LTS"
+    - "Ubuntu 22.04 LTS"
+    - "Debian 11 (Bullseye)"
+    - "Fedora 37"
+    - "Arch Linux"
+  
+  # Test Architectures
+  test_architectures:
+    - "x86_64"
+    - "aarch64"  # ARM64
+  
+  # Test Desktop Environments
+  test_desktops:
+    - "GNOME"
+    - "KDE Plasma"
+    - "Xfce"
+    - "Wayland"
+    - "X11"
+  
+  # Test GPU Configurations
+  test_gpus:
+    - "NVIDIA GTX 1660 SUPER"
+    - "NVIDIA RTX 3060"
+    - "NVIDIA RTX 4090"
+    - "AMD RX 580"
+    - "AMD RX 6800 XT"
+    - "AMD RX 7900 XTX"
+    - "Intel Arc A770"
+    - "Integrated Graphics (Intel/AMD)"
+
+# Build Matrix
+build_matrix:
+  # Python Versions
+  python_versions:
+    - "3.9"
+    - "3.10"
+    - "3.11"
+  
+  # Architectures
+  architectures:
+    - "x86_64"
+    - "aarch64"
+  
+  # Distributions
+  distributions:
+    - "ubuntu-20.04"
+    - "ubuntu-22.04"
+    - "debian-11"
+    - "fedora-37"
+    - "arch"
+  
+  # Build Types
+  build_types:
+    - "release"  # Optimized release build
+    - "debug"  # Debug build with symbols
+
+# Version Tracking
+version:
+  current: "0.1.0"
+  config_version: "1.0.0"
+  last_updated: "2024-01-01"
+  
+  # Compatibility Matrix
+  compatibility:
+    "0.1.0":
+      kernel_min: "5.4"
+      glibc_min: "2.31"
+      python_min: "3.9"
+      python_max: "3.11"
+      cuda_min: "11.0"
+      rocm_min: "4.0"
+
+# CI/CD Integration
+ci_cd:
+  # GitHub Actions
+  github_actions:
+    enabled: true
+    runners:
+      - "ubuntu-latest"
+      - "ubuntu-20.04"
+      - "self-hosted"
+  
+  # GitLab CI
+  gitlab_ci:
+    enabled: false
+    runners:
+      - "docker"
+      - "shell"
+  
+  # Build Automation
+  automation:
+    auto_build_on_tag: true
+    auto_publish_releases: true
+    create_github_release: true
+
+# Distribution
+distribution:
+  # GitHub Releases
+  github:
+    create_release: true
+    upload_assets:
+      - "MAGI-Pipeline.AppImage"
+      - "magi-pipeline_0.1.0_amd64.deb"
+      - "magi-pipeline-0.1.0-1.x86_64.rpm"
+      - "magi-pipeline-0.1.0.tar.gz"
+  
+  # Package Repositories
+  repositories:
+    - "PPA (Ubuntu)"
+    - "COPR (Fedora)"
+    - "AUR (Arch Linux)"
+    - "Open Build Service"
+  
+  # Direct Download
+  direct_download:
+    enabled: true
+    cdn_enabled: false
+    mirror_enabled: false
+
+# Documentation
+documentation:
+  # Installation Guides
+  installation_guides:
+    - "Ubuntu/Debian"
+    - "Fedora/RHEL"
+    - "Arch Linux"
+    - "AppImage (Universal)"
+  
+  # Troubleshooting
+  troubleshooting:
+    - "GPU driver issues"
+    - "Dependency conflicts"
+    - "Permission issues"
+    - "Wayland vs X11"
+
+# Security
+security:
+  # Code Signing
+  code_signing:
+    enabled: false
+    gpg_key: ""
+  
+  # Vulnerability Scanning
+  vulnerability_scanning:
+    enabled: true
+    tools:
+      - "snyk"
+      - "dependabot"
+  
+  # Security Audits
+  security_audits:
+    frequency: "monthly"
+    tools:
+      - "bandit"
+      - "safety"

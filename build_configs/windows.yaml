@@ -1,0 +1,173 @@
+# Windows Build Configuration for MAGI Pipeline
+# This configuration is optimized for Windows platforms
+
+# Build Method
+build_method: nuitka  # Options: nuitka, pyinstaller
+
+# Nuitka Configuration
+nuitka:
+  # Compiler Settings
+  compiler: msvc  # Options: msvc, mingw
+  
+  # Optimization
+  lto: true  # Link-time optimization
+  jobs: 4  # Number of parallel jobs
+  
+  # Output Settings
+  standalone: true
+  onefile: true
+  
+  # Windows-specific
+  console_mode: disable  # Options: disable, attach, force
+  icon: src/ui/static/magi-icon.ico
+  
+  # Performance
+  follow_imports: true
+  include_modules:
+    - src.pipeline.controller
+    - src.input.video_input
+    - src.input.game_capture
+    - src.input.camera_capture
+    - src.processing.interpolation
+    - src.processing.upscaling
+    - src.processing.frame_cadence
+    - src.processing.processing_3d
+    - src.output.magi_encoder
+    - cv2
+    - numpy
+    - fastapi
+    - uvicorn
+  
+  # Data Files
+  include_data_dirs:
+    - src/ui/static=src/ui/static
+    - config=config
+  
+  # Exclusions (reduce bundle size)
+  exclude_modules:
+    - tkinter
+    - matplotlib
+    - pandas
+    - scipy
+    - ipython
+    - jupyter
+
+# PyInstaller Configuration (fallback)
+pyinstaller:
+  # Output Settings
+  onefile: true
+  console: false
+  icon: src/ui/static/magi-icon.ico
+  
+  # Data Files
+  datas:
+    - src/ui/static;src/ui/static
+    - config;config
+  
+  # Hidden Imports
+  hiddenimports:
+    - cv2
+    - numpy
+    - fastapi
+    - uvicorn
+    - pydantic
+    - src.pipeline.controller
+    - src.input.video_input
+    - src.processing.interpolation
+    - src.processing.upscaling
+    - src.processing.frame_cadence
+    - src.output.magi_encoder
+  
+  # Exclusions
+  excludes:
+    - tkinter
+    - matplotlib
+    - pandas
+    - scipy
+  
+  # Optimization
+  upx: true
+  strip: false
+
+# Windows-specific Settings
+windows:
+  # Supported Windows Versions
+  min_version: "10"  # Windows 10+
+  
+  # GPU Support
+  gpu_support:
+    - cuda  # NVIDIA CUDA
+    - directml  # AMD DirectML
+  
+  # Camera Support
+  camera_support:
+    - directshow  # DirectShow API
+    - media_foundation  # Media Foundation API
+  
+  # Game Capture
+  game_capture:
+    - desktop_duplication  # Desktop Duplication API
+    - windows_graphics_capture  # Windows Graphics Capture API
+  
+  # Installer Settings
+  installer:
+    tool: nsis  # Options: nsis, innosetup
+    create_installer: true
+    install_dir: "$PROGRAMFILES\\MAGI Pipeline"
+    create_desktop_shortcut: true
+    create_start_menu_shortcut: true
+    add_to_path: false
+  
+  # Code Signing (optional)
+  code_signing:
+    enabled: false
+    certificate_path: ""
+    timestamp_url: ""
+
+# Performance Optimization
+performance:
+  # GPU Acceleration
+  gpu_acceleration: true
+  cuda_version: "12.0"  # Minimum CUDA version
+  
+  # CPU Optimization
+  cpu_optimization: true
+  avx_support: true  # AVX/AVX2 instructions
+  
+  # Memory Optimization
+  memory_optimization: true
+  memory_fraction: 0.8  # Use 80% of available GPU memory
+
+# Dependencies
+dependencies:
+  # Python Version
+  python_version: "3.9"  # Minimum Python version
+  
+  # System Dependencies
+  system:
+    - "Microsoft Visual C++ Redistributable"
+    - "DirectX End-User Runtime"
+    - "NVIDIA CUDA Toolkit (for NVIDIA GPUs)"
+  
+  # Python Dependencies
+  python:
+    - opencv-python
+    - numpy
+    - fastapi
+    - uvicorn
+    - python-multipart
+    - pydantic
+    - torch  # For AI models
+    - torchvision  # For AI models
+
+# Testing
+testing:
+  # Test on Windows Versions
+  test_versions:
+    - "Windows 10 (21H2)"
+    - "Windows 11 (22H2)"
+  
+  # Test GPU Configurations
+  test_gpus:
+    - "NVIDIA GTX 1660 SUPER"
+    - "NVIDIA RTX
