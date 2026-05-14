@@ -1,0 +1,64 @@
+name: Build Windows Executable
+
+on:
+  push:
+    branches: [ master, main ]
+    tags:
+      - 'v*'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install nuitka pyinstaller ordered-set zstandard pyyaml
+    
+    - name: Install project dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Build with Nuitka
+      run: |
+        python build_desktop.py --config build_configs/windows.yaml --nuitka
+    
+    - name: Create Windows installer
+      run: |
+        # Check if NSIS is available
+        if (Get-Command makensis -ErrorAction SilentlyContinue)) {
+            makensis installer.nsi
+        } else {
+            Write-Host "NSIS not found. Skipping installer creation."
+        }
+    
+    - name: Upload executable
+      uses: actions/upload-artifact@v3
+      with:
+        name: MAGI-Pipeline-Windows
+        path: |
+          dist/*.exe
+          installer.exe
+        retention-days: 30
+    
+    - name: Create Release (if tagged)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/*.exe
+          installer.exe
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
