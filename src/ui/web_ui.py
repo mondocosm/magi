@@ -16,6 +16,7 @@ import uuid
 
 from ..core.config import Config
 from ..pipeline.controller import MAGIPipeline
+from .magi_viewer import viewer_router
 
 
 # Get the static files directory
@@ -80,6 +81,9 @@ class WebUI:
         # Mount static files
         if static_dir.exists():
             self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+        
+        # Include viewer router
+        self.app.include_router(viewer_router)
         
         @self.app.get("/")
         async def root():

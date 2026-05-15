@@ -38,11 +38,17 @@ header {
     position: relative;
 }
 
-.about-link {
+.header-links {
     position: absolute;
     right: 0;
     top: 50%;
     transform: translateY(-50%);
+    display: flex;
+    gap: 10px;
+}
+
+.about-link,
+.viewer-link {
     color: #ffffff;
     text-decoration: none;
     font-weight: 500;
@@ -53,10 +59,21 @@ header {
     font-size: 0.9em;
 }
 
-.about-link:hover {
+.about-link:hover,
+.viewer-link:hover {
     background: #ffffff;
     color: #1a1a1a;
-    transform: translateY(-50%) scale(1.05);
+    transform: scale(1.05);
+}
+
+.viewer-link {
+    background: #667eea;
+    border-color: #667eea;
+}
+
+.viewer-link:hover {
+    background: #764ba2;
+    border-color: #764ba2;
 }
 
 .logo {
