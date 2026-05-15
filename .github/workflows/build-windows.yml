@@ -36,7 +36,7 @@ jobs:
     - name: Create Windows installer
       run: |
         # Check if NSIS is available
-        if (Get-Command makensis -ErrorAction SilentlyContinue)) {
+        if (Get-Command makensis -ErrorAction SilentlyContinue) {
             makensis installer.nsi
         } else {
             Write-Host "NSIS not found. Skipping installer creation."

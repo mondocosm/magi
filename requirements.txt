@@ -1,64 +1,66 @@
 # Core dependencies
-opencv-python>=4.8.0
-numpy>=1.24.0
+numpy>=1.21.0
+opencv-python>=4.5.0
+fastapi>=0.68.0
+uvicorn>=0.15.0
+python-multipart>=0.0.5
 ffmpeg-python>=0.2.0
+pyyaml>=5.4.0
 
-# AI/ML frameworks
-torch>=2.0.0
-torchvision>=0.15.0
-onnxruntime-gpu>=1.15.0
+# AI/ML dependencies
+torch>=1.9.0
+torchvision>=0.10.0
+Pillow>=8.3.0
 
-# Web framework for API and UI
-fastapi>=0.100.0
-uvicorn[standard]>=0.23.0
-pydantic>=2.0.0
-python-multipart>=0.0.6
+# Optional: StereoCrafter dependencies
+# git+https://github.com/stereocrafter/stereocrafter.git
 
-# Async support
-asyncio>=3.4.3
-aiofiles>=23.0.0
+# Optional: Frame interpolation
+# rife-ncnn-vulkan
+# dain-ncnn-vulkan
 
-# Configuration and utilities
-PyYAML>=6.0
-python-dotenv>=1.0.0
-click>=8.1.0
-rich>=13.0.0
+# Optional: Upscaling
+# waifu2x-ncnn-vulkan
+# realesrgan-ncnn-vulkan
 
-# Image processing
-Pillow>=10.0.0
-imageio>=2.31.0
-scikit-image>=0.21.0
+# Optional: GPU acceleration
+# onnxruntime-gpu>=1.8.0
+# tensorrt>=8.0.0
 
-# Video processing
-moviepy>=1.0.3
-av>=11.0.0
+# Optional: Cloud GPU
+# runpod>=1.0.0
+# vastai>=1.0.0
 
-# GPU acceleration
-vulkan>=1.2.0
-pyopencl>=2023.1
+# Optional: Game capture
+# pywin32>=300 (Windows only)
+# pyobjc>=7.0 (macOS only)
+# python-xlib>=0.31 (Linux only)
 
-# Game capture
-mss>=9.0.0
-pygetwindow>=0.0.9
-obsws-python>=1.0.0
+# Optional: Camera input
+# pyzed>=3.0 (ZED cameras)
+# pykinect>=1.0 (Kinect)
+# pyrealsense2>=2.40 (RealSense)
 
-# Cloud GPU integration
-requests>=2.31.0
+# Optional: VR headset support
+# openvr>=1.16.0
+# openxr>=1.0.0
 
-# Progress bars and logging
-tqdm>=4.65.0
-loguru>=0.7.0
+# Optional: 3D projector support
+# pyopengl>=3.1.5
+# pyglet>=1.5.0
 
-# Testing
-pytest>=7.4.0
-pytest-asyncio>=0.21.0
-pytest-cov>=4.1.0
+# Optional: WebRTC for streaming
+# aiortc>=1.3.0
+# av>=8.0.0
 
-# Development tools
-black>=23.0.0
-flake8>=6.0.0
-mypy>=1.4.0
+# Optional: GUI
+# PyQt5>=5.15.0
+# tkinter (built-in)
 
-# Optional: For enhanced upscaling
-# waifu2x-ncnn-vulkan (install separately)
-# realsr-ncnn-vulkan (install separately)
+# Optional: Testing
+# pytest>=6.2.0
+# pytest-cov>=2.12.0
+
+# Optional: Documentation
+# sphinx>=4.0.0
+# sphinx-rtd-theme>=0.5.0
