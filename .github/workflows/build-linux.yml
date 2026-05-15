@@ -1,0 +1,65 @@
+name: Build Linux Executable
+
+on:
+  push:
+    branches: [ master, main ]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install nuitka pyinstaller ordered-set zstandard pyyaml
+    
+    - name: Install project dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Build with Nuitka
+      run: |
+        python build_desktop.py --config build_configs/linux.yaml --nuitka
+    
+    - name: Create AppImage
+      run: |
+        if command -v appimagetool &> /dev/null; then
+          appimagetool dist MAGI-Pipeline.AppImage
+        else
+          echo "appimagetool not found. Skipping AppImage creation."
+        fi
+    
+    - name: Upload executable
+      uses: actions/upload-artifact@v3
+      with:
+        name: MAGI-Pipeline-Linux
+        path: |
+          dist/*.bin
+          dist/*.AppImage
+          MAGI-Pipeline.AppImage
+        retention-days: 30
+    
+    - name: Create Release (if tagged)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/*.bin
+          dist/*.AppImage
+          MAGI-Pipeline.AppImage
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
