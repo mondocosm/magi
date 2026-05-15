@@ -3,9 +3,7 @@ name: Build Windows Executable
 on:
   push:
     branches: [ master, main ]
-    tags:
-      - 'v*'
-  workflow_dispatch:  # Allow manual triggering
+  workflow_dispatch:
 
 jobs:
   build-windows:
@@ -23,42 +21,57 @@ jobs:
     - name: Install build dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install nuitka pyinstaller ordered-set zstandard pyyaml
+        pip install pyinstaller pyyaml
     
     - name: Install project dependencies
       run: |
-        pip install -r requirements.txt
+        pip install fastapi uvicorn python-multipart numpy opencv-python
     
-    - name: Build with Nuitka
+    - name: Create entry point script
       run: |
-        python build_desktop.py --config build_configs/windows.yaml --nuitka
+        echo import sys > magi_pipeline.py
+        echo import os >> magi_pipeline.py
+        echo. >> magi_pipeline.py
+        echo sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src')) >> magi_pipeline.py
+        echo. >> magi_pipeline.py
+        echo from src.ui.web_ui import create_web_ui >> magi_pipeline.py
+        echo. >> magi_pipeline.py
+        echo if __name__ == '__main__': >> magi_pipeline.py
+        echo     web_ui = create_web_ui() >> magi_pipeline.py
+        echo     web_ui.run(host='0.0.0.0', port=8000) >> magi_pipeline.py
     
-    - name: Create Windows installer
+    - name: Build with PyInstaller
       run: |
-        # Check if NSIS is available
-        if (Get-Command makensis -ErrorAction SilentlyContinue) {
-            makensis installer.nsi
-        } else {
-            Write-Host "NSIS not found. Skipping installer creation."
-        }
+        pyinstaller --onefile --name "MAGI-Pipeline" magi_pipeline.py
+    
+    - name: Create distribution directory
+      run: |
+        mkdir dist
+        copy dist\MAGI-Pipeline.exe dist\MAGI-Pipeline-Windows.exe
     
     - name: Upload executable
       uses: actions/upload-artifact@v3
       with:
         name: MAGI-Pipeline-Windows
-        path: |
-          dist/*.exe
-          installer.exe
-        retention-days: 30
+        path: dist/MAGI-Pipeline-Windows.exe
+        retention-days: 90
     
-    - name: Create Release (if tagged)
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          dist/*.exe
-          installer.exe
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create Release Summary
+      run: |
+        echo "## Build Complete" >> $env:GITHUB_STEP_SUMMARY
+        echo "" >> $env:GITHUB_STEP_SUMMARY
+        echo "### Download Instructions" >> $env:GITHUB_STEP_SUMMARY
+        echo "" >> $env:GITHUB_STEP_SUMMARY
+        echo "1. Go to the **Actions** tab in this repository" >> $env:GITHUB_STEP_SUMMARY
+        echo "2. Click on the latest **Build Windows Executable** workflow run" >> $env:GITHUB_STEP_SUMMARY
+        echo "3. Scroll down to the **Artifacts** section" >> $env:GITHUB_STEP_SUMMARY
+        echo "4. Click on **MAGI-Pipeline-Windows** to download" >> $env:GITHUB_STEP_SUMMARY
+        echo "" >> $env:GITHUB_STEP_SUMMARY
+        echo "### What You'll Get" >> $env:GITHUB_STEP_SUMMARY
+        echo "- **MAGI-Pipeline-Windows.exe** - Standalone Windows executable" >> $env:GITHUB_STEP_SUMMARY
+        echo "" >> $env:GITHUB_STEP_SUMMARY
+        echo "### How to Use" >> $env:GITHUB_STEP_SUMMARY
+        echo "1. Download the executable" >> $env:GITHUB_STEP_SUMMARY
+        echo "2. Double-click to run" >> $env:GITHUB_STEP_SUMMARY
+        echo "3. Open your browser to http://localhost:8000" >> $env:GITHUB_STEP_SUMMARY
+        echo "" >> $env:GITHUB_STEP_SUMMARY
