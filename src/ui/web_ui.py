@@ -17,6 +17,7 @@ import uuid
 from ..core.config import Config
 from ..pipeline.controller import MAGIPipeline
 from .magi_viewer import viewer_router
+from .bino_integration import create_bino_integration
 
 
 # Get the static files directory
@@ -55,6 +56,9 @@ class WebUI:
         # Camera capture
         self.camera_pipeline = None
         self.camera_capture_active = False
+        
+        # Bino3D integration
+        self.bino_integration = create_bino_integration()
         
         # Setup middleware
         self._setup_middleware()
@@ -530,6 +534,65 @@ class WebUI:
                     "mode": stats["mode"],
                     "camera_type": stats["camera_type"],
                     "camera_fps": stats["camera_fps"]
+                }
+            
+            except HTTPException:
+                raise
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+        
+        @self.app.get("/api/bino/capabilities")
+        async def get_bino_capabilities():
+            """Get Bino3D capabilities"""
+            try:
+                capabilities = self.bino_integration.get_capabilities()
+                return capabilities
+            
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+        
+        @self.app.post("/api/bino/play")
+        async def play_with_bino(request: dict):
+            """Play MAGI file using Bino3D"""
+            try:
+                magi_file = request.get("magi_file")
+                settings = request.get("settings", {})
+                
+                if not magi_file:
+                    raise HTTPException(status_code=400, detail="magi_file is required")
+                
+                # Configure for MAGI if not specified
+                if "input_mode" not in settings:
+                    self.bino_integration.configure_for_magi()
+                
+                # Play file
+                process = self.bino_integration.play_magi_file(magi_file, settings)
+                
+                return {
+                    "status": "playing",
+                    "pid": process.pid,
+                    "magi_file": magi_file,
+                    "settings": settings
+                }
+            
+            except HTTPException:
+                raise
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+        
+        @self.app.post("/api/bino/test-pattern")
+        async def play_test_pattern(request: dict):
+            """Play test pattern using Bino3D"""
+            try:
+                pattern_type = request.get("pattern_type", "motion_blur")
+                
+                # Play test pattern
+                process = self.bino_integration.play_test_pattern(pattern_type)
+                
+                return {
+                    "status": "playing",
+                    "pid": process.pid,
+                    "pattern_type": pattern_type
                 }
             
             except HTTPException:
