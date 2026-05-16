@@ -29,10 +29,12 @@ MAGI is a high-frame-rate (HFR) 3D cinema system designed for maximum immersion:
 
 ## 📥 Download Executables
 
+**📖 Detailed Download Guide**: See [DOWNLOAD_GUIDE.md](DOWNLOAD_GUIDE.md) for step-by-step instructions with screenshots.
+
 ### Quick Download
 1. Go to [GitHub Actions](https://github.com/mondocosm/magi/actions)
-2. Click on the latest workflow run
-3. Scroll down to "Artifacts" section
+2. Click on the latest workflow run (look for green checkmark ✓)
+3. **Scroll to the bottom** of the page to find the "Artifacts" section
 4. Download the executable for your platform
 
 ### Windows
@@ -53,6 +55,8 @@ MAGI is a high-frame-rate (HFR) 3D cinema system designed for maximum immersion:
 ### All Platforms
 - **Artifact**: `MAGI-Pipeline-All-Platforms`
 - **Usage**: Contains executables for all platforms in one download
+
+**⚠️ Important**: The Artifacts section is at the **bottom** of the workflow run page, not at the top!
 
 ## 🛠️ Installation
 
