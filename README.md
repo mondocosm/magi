@@ -29,34 +29,39 @@ MAGI is a high-frame-rate (HFR) 3D cinema system designed for maximum immersion:
 
 ## 📥 Download Executables
 
-**📖 Detailed Download Guide**: See [DOWNLOAD_GUIDE.md](DOWNLOAD_GUIDE.md) for step-by-step instructions with screenshots.
+### 🎯 Easiest Method: GitHub Releases
 
-### Quick Download
+**Recommended**: Download from GitHub Releases for the easiest experience!
+
+1. Go to [Releases](https://github.com/mondocosm/magi/releases)
+2. Click on the latest release (e.g., "v1.0.0")
+3. Download the executable for your platform
+4. No need to scroll or search - downloads are right at the top!
+
+### 📦 Alternative: GitHub Actions
+
+**� Detailed Download Guide**: See [DOWNLOAD_GUIDE.md](DOWNLOAD_GUIDE.md) for step-by-step instructions.
+
 1. Go to [GitHub Actions](https://github.com/mondocosm/magi/actions)
 2. Click on the latest workflow run (look for green checkmark ✓)
 3. **Scroll to the bottom** of the page to find the "Artifacts" section
 4. Download the executable for your platform
 
-### Windows
-- **Artifact**: `MAGI-Pipeline-Windows-Executable`
+### Available Downloads
+
+**Windows:**
 - **File**: `MAGI-Pipeline-Windows.exe`
 - **Usage**: Double-click to run, web UI opens automatically
 
-### macOS
-- **Artifact**: `MAGI-Pipeline-macOS-Executable`
+**macOS:**
 - **Files**: `MAGI Pipeline.app`, `MAGI-Pipeline.pkg`
 - **Usage**: Double-click the app or install the package
 
-### Linux
-- **Artifact**: `MAGI-Pipeline-Linux-Executable`
+**Linux:**
 - **Files**: `MAGI-Pipeline-Linux`, `MAGI-Pipeline.AppImage`
 - **Usage**: `chmod +x MAGI-Pipeline-Linux && ./MAGI-Pipeline-Linux`
 
-### All Platforms
-- **Artifact**: `MAGI-Pipeline-All-Platforms`
-- **Usage**: Contains executables for all platforms in one download
-
-**⚠️ Important**: The Artifacts section is at the **bottom** of the workflow run page, not at the top!
+**⚠️ Important**: When using GitHub Actions, the Artifacts section is at the **bottom** of the workflow run page!
 
 ## 🛠️ Installation
 

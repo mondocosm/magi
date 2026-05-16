@@ -1,0 +1,99 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller pyyaml
+    
+    - name: Install project dependencies
+      run: |
+        pip install fastapi uvicorn python-multipart numpy opencv-python
+    
+    - name: Build Linux executable
+      run: |
+        pyinstaller --onefile --name "MAGI-Pipeline-Linux" --add-data "src/ui/static:src/ui/static" src/ui/desktop_launcher.py
+        mkdir -p release
+        cp dist/MAGI-Pipeline-Linux release/
+        chmod +x release/MAGI-Pipeline-Linux
+    
+    - name: Create release notes
+      run: |
+        cat > release/RELEASE_NOTES.md << 'EOF'
+        # MAGI Pipeline Release
+        
+        ## What's Included
+        
+        This release includes the MAGI Pipeline desktop application with all features:
+        
+        - Video conversion to MAGI format (120fps 4K 3D)
+        - MAGI Viewer with test patterns and 3D display modes
+        - Frame synchronization (VSync, G-Sync, FreeSync)
+        - Real-time game capture and camera input
+        - AI-powered upscaling and frame interpolation
+        - 2D to 3D conversion
+        
+        ## Installation
+        
+        ### Linux
+        1. Download `MAGI-Pipeline-Linux`
+        2. Make executable: `chmod +x MAGI-Pipeline-Linux`
+        3. Run: `./MAGI-Pipeline-Linux`
+        
+        ## Usage
+        
+        1. Run the executable
+        2. The web UI will open automatically in your browser
+        3. Access MAGI Viewer at http://localhost:8000/viewer/viewer
+        
+        ## System Requirements
+        
+        - CPU: 4-core processor (8-core recommended)
+        - RAM: 8 GB (16 GB recommended)
+        - GPU: Integrated graphics or better (NVIDIA RTX 3060+ recommended)
+        - Storage: 10 GB free space (50 GB recommended)
+        
+        ## Documentation
+        
+        - [User Manual](https://github.com/mondocosm/magi/blob/master/USER_MANUAL.md)
+        - [Download Guide](https://github.com/mondocosm/magi/blob/master/DOWNLOAD_GUIDE.md)
+        - [Build Guide](https://github.com/mondocosm/magi/blob/master/BUILD_DESKTOP.md)
+        
+        ## Support
+        
+        For issues or questions, please open an issue on GitHub.
+        EOF
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release/*
+        body_path: release/RELEASE_NOTES.md
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
