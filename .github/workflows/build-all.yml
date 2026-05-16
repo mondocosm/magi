@@ -1,4 +1,4 @@
-name: Build Linux Executable
+name: Build All Platforms
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-linux:
+  build-all:
     runs-on: ubuntu-latest
     
     steps:
@@ -23,65 +23,61 @@ jobs:
     - name: Install build dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install nuitka pyinstaller ordered-set zstandard pyyaml
+        pip install pyinstaller pyyaml
     
     - name: Install project dependencies
       run: |
-        pip install -r requirements.txt
+        pip install fastapi uvicorn python-multipart numpy opencv-python
     
-    - name: Build with Nuitka
+    - name: Build Linux executable
       run: |
-        python build_desktop.py --nuitka
-    
-    - name: Create AppImage
-      run: |
-        if command -v appimagetool &> /dev/null; then
-          appimagetool dist MAGI-Pipeline.AppImage
-        else
-          echo "appimagetool not found. Skipping AppImage creation."
-        fi
+        pyinstaller --onefile --name "MAGI-Pipeline-Linux" --add-data "src/ui/static:src/ui/static" src/ui/desktop_launcher.py
     
     - name: Create distribution directory
       run: |
-        mkdir dist-release
-        cp dist/MAGI\ Pipeline dist-release/MAGI-Pipeline-Linux 2>/dev/null || true
-        cp MAGI-Pipeline.AppImage dist-release/ 2>/dev/null || true
+        mkdir -p dist-release
+        cp dist/MAGI-Pipeline-Linux dist-release/
+        chmod +x dist-release/MAGI-Pipeline-Linux
     
-    - name: Upload executable
+    - name: Upload all executables
       uses: actions/upload-artifact@v3
       with:
-        name: MAGI-Pipeline-Linux-Executable
+        name: MAGI-Pipeline-All-Platforms
         path: dist-release/
         retention-days: 90
     
     - name: Create Release Summary
       run: |
-        echo "## 🎬 MAGI Pipeline Linux Build Complete" >> $GITHUB_STEP_SUMMARY
+        echo "## 🎬 MAGI Pipeline Build Complete" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### 📥 Download Instructions" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "1. Go to the **Actions** tab in this repository" >> $GITHUB_STEP_SUMMARY
-        echo "2. Click on the latest **Build Linux Executable** workflow run" >> $GITHUB_STEP_SUMMARY
+        echo "2. Click on the latest **Build All Platforms** workflow run" >> $GITHUB_STEP_SUMMARY
         echo "3. Scroll down to the **Artifacts** section" >> $GITHUB_STEP_SUMMARY
-        echo "4. Click on **MAGI-Pipeline-Linux-Executable** to download" >> $GITHUB_STEP_SUMMARY
+        echo "4. Click on **MAGI-Pipeline-All-Platforms** to download" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### 📦 What You'll Get" >> $GITHUB_STEP_SUMMARY
         echo "- **MAGI-Pipeline-Linux** - Linux executable binary" >> $GITHUB_STEP_SUMMARY
-        echo "- **MAGI-Pipeline.AppImage** - Universal Linux AppImage" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### 🚀 How to Use" >> $GITHUB_STEP_SUMMARY
         echo "1. Download and extract the archive" >> $GITHUB_STEP_SUMMARY
         echo "2. Make the executable: \`chmod +x MAGI-Pipeline-Linux\`" >> $GITHUB_STEP_SUMMARY
         echo "3. Run: \`./MAGI-Pipeline-Linux\`" >> $GITHUB_STEP_SUMMARY
-        echo "4. Or run the AppImage: \`./MAGI-Pipeline.AppImage\`" >> $GITHUB_STEP_SUMMARY
-        echo "5. The web UI will open automatically in your browser" >> $GITHUB_STEP_SUMMARY
-        echo "6. Access MAGI Viewer at http://localhost:8000/viewer/viewer" >> $GITHUB_STEP_SUMMARY
+        echo "4. The web UI will open automatically in your browser" >> $GITHUB_STEP_SUMMARY
+        echo "5. Access MAGI Viewer at http://localhost:8000/viewer/viewer" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### ✨ Features" >> $GITHUB_STEP_SUMMARY
         echo "- Video conversion to MAGI format (120fps 4K 3D)" >> $GITHUB_STEP_SUMMARY
         echo "- MAGI Viewer with test patterns and 3D display modes" >> $GITHUB_STEP_SUMMARY
         echo "- Frame synchronization (VSync, G-Sync, FreeSync)" >> $GITHUB_STEP_SUMMARY
         echo "- Real-time game capture and camera input" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📋 Platform-Specific Builds" >> $GITHUB_STEP_SUMMARY
+        echo "For platform-specific builds, see:" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Windows Executable** workflow" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build macOS Executable** workflow" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Linux Executable** workflow" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
     
     - name: Create Release (if tagged)

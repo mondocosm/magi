@@ -24,7 +24,7 @@ body {
 header {
     background: #2d2d2d;
     color: #ffffff;
-    padding: 50px 40px;
+    padding: 30px 40px;
     text-align: center;
     border-bottom: 2px solid #404040;
 }
@@ -33,7 +33,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
@@ -321,6 +321,13 @@ h3 {
     border-radius: 12px;
 }
 
+.section-description {
+    color: #cccccc;
+    font-size: 0.95em;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
 .config-group {
     margin-bottom: 20px;
 }
@@ -359,6 +366,53 @@ h3 {
     display: flex;
     align-items: center;
     cursor: pointer;
+}
+
+/* Frame Synchronization Controls */
+.sync-controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+/* Frame Synchronization Statistics */
+.sync-stats {
+    margin-top: 30px;
+    padding: 20px;
+    background: #4d4d4d;
+    border-radius: 10px;
+    border: 2px solid #5d5d5d;
+}
+
+.sync-stats h3 {
+    color: #ffffff;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.sync-info {
+    padding-top: 20px;
+    border-top: 2px solid #6d6d6d;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.95em;
+}
+
+.info-label {
+    color: #cccccc;
+    font-weight: 500;
+}
+
+.info-value {
+    color: #ffffff;
+    font-weight: 600;
 }
 
 /* Action Section */

@@ -1,6 +1,6 @@
 """
 MAGI Viewer - Display MAGI format videos with proper cadence
-Similar to Blur Busters for high-frame-rate display testing
+High-Frame-Rate 3D Cinema Display System
 """
 
 import asyncio
@@ -37,6 +37,11 @@ class MAGIViewer(LoggerMixin):
         self.show_frame_info = True
         self.show_cadence_indicator = True
         self.show_fps_counter = True
+        
+        # 3D display mode settings
+        self.display_mode = "stereo"  # Default to shutter glasses
+        self.eye_swap = False
+        self.parallax = 0
         
         # Test patterns
         self.test_patterns = {
@@ -129,6 +134,29 @@ class MAGIViewer(LoggerMixin):
         self.playback_speed = speed
         self.logger.info(f"Playback speed set to {speed}x")
     
+    def set_display_mode(self, mode: str, eye_swap: bool = False, parallax: int = 0):
+        """Set 3D display mode"""
+        self.display_mode = mode
+        self.eye_swap = eye_swap
+        self.parallax = parallax
+        
+        mode_names = {
+            'stereo': 'Shutter Glasses',
+            'anaglyph_red_cyan': 'Anaglyph (Red-Cyan)',
+            'anaglyph_green_magenta': 'Anaglyph (Green-Magenta)',
+            'anaglyph_amber_blue': 'Anaglyph (Amber-Blue)',
+            'side_by_side': 'Side-by-Side',
+            'top_bottom': 'Top-Bottom',
+            'interleaved': 'Interleaved',
+            'checkerboard': 'Checkerboard',
+            'autostereoscopic': 'Glasses-Free',
+            'vr': 'VR Headset'
+        }
+        
+        self.logger.info(f"Display mode set to: {mode_names.get(mode, mode)}")
+        self.logger.info(f"Eye swap: {'Enabled' if eye_swap else 'Disabled'}")
+        self.logger.info(f"Parallax: {parallax}")
+    
     def get_frame_info(self) -> Dict[str, Any]:
         """Get current frame information"""
         return {
@@ -139,6 +167,9 @@ class MAGIViewer(LoggerMixin):
             "current_video": self.current_video,
             "cadence_mode": self.cadence_mode,
             "eye_separation": self.eye_separation,
+            "display_mode": self.display_mode,
+            "eye_swap": self.eye_swap,
+            "parallax": self.parallax,
         }
     
     def _create_motion_blur_pattern(self, width: int = 1920, height: int = 1080) -> np.ndarray:
@@ -256,6 +287,55 @@ async def websocket_endpoint(websocket: WebSocket):
                 viewer_instance.set_playback_speed(data.get("speed", 1.0))
             elif data.get("type") == "load":
                 viewer_instance.load_video(data.get("video_path", ""))
+            elif data.get("type") == "display_mode":
+                # Handle display mode changes
+                viewer_instance.set_display_mode(
+                    data.get("mode", "stereo"),
+                    data.get("eye_swap", False),
+                    data.get("parallax", 0)
+                )
+            elif data.get("type") == "test_pattern":
+                # Handle test pattern requests
+                pattern_name = data.get("pattern", "")
+                try:
+                    import cv2
+                    import base64
+                    
+                    # Generate test pattern
+                    pattern = viewer_instance.get_test_pattern(pattern_name, 1920, 1080)
+                    
+                    # Convert to JPEG with high quality
+                    _, buffer = cv2.imencode('.jpg', pattern, [cv2.IMWRITE_JPEG_QUALITY, 95])
+                    pattern_data = base64.b64encode(buffer).decode('utf-8')
+                    
+                    viewer_instance.logger.info(f"Generated test pattern: {pattern_name}, size: {len(pattern_data)} bytes")
+                    
+                    # Send test pattern to client
+                    await websocket.send_json({
+                        "type": "test_pattern",
+                        "pattern": pattern_name,
+                        "data": pattern_data,
+                        "info": {
+                            "frame": 0,
+                            "eye": "left",
+                            "width": 1920,
+                            "height": 1080
+                        }
+                    })
+                except ImportError as e:
+                    viewer_instance.logger.error(f"OpenCV not available: {e}")
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": f"OpenCV not installed. Please install opencv-python: {str(e)}"
+                    })
+                except Exception as e:
+                    viewer_instance.logger.error(f"Error generating test pattern: {e}")
+                    import traceback
+                    viewer_instance.logger.error(f"Traceback: {traceback.format_exc()}")
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": f"Failed to generate test pattern: {str(e)}"
+                    })
             
             # Send frame info back
             await websocket.send_json({
@@ -280,6 +360,31 @@ async def get_test_patterns():
 async def get_frame_info():
     """Get current frame information"""
     return viewer_instance.get_frame_info()
+
+
+@viewer_router.get("/display-info")
+async def get_display_info():
+    """Get current display mode information"""
+    mode_names = {
+        'stereo': 'Shutter Glasses',
+        'anaglyph_red_cyan': 'Anaglyph (Red-Cyan)',
+        'anaglyph_green_magenta': 'Anaglyph (Green-Magenta)',
+        'anaglyph_amber_blue': 'Anaglyph (Amber-Blue)',
+        'side_by_side': 'Side-by-Side',
+        'top_bottom': 'Top-Bottom',
+        'interleaved': 'Interleaved',
+        'checkerboard': 'Checkerboard',
+        'autostereoscopic': 'Glasses-Free',
+        'vr': 'VR Headset'
+    }
+    
+    return {
+        "display_mode": viewer_instance.display_mode,
+        "display_mode_name": mode_names.get(viewer_instance.display_mode, viewer_instance.display_mode),
+        "eye_swap": viewer_instance.eye_swap,
+        "parallax": viewer_instance.parallax,
+        "available_modes": list(mode_names.keys())
+    }
 
 
 @viewer_router.post("/load-video")
@@ -324,6 +429,19 @@ async def set_speed(speed: float):
     return {"status": "success", "message": f"Playback speed set to {speed}x"}
 
 
+@viewer_router.post("/display-mode")
+async def set_display_mode(mode: str, eye_swap: bool = False, parallax: int = 0):
+    """Set 3D display mode"""
+    viewer_instance.set_display_mode(mode, eye_swap, parallax)
+    return {
+        "status": "success",
+        "message": f"Display mode set to {mode}",
+        "mode": mode,
+        "eye_swap": eye_swap,
+        "parallax": parallax
+    }
+
+
 @viewer_router.get("/viewer")
 async def get_viewer_page():
     """Get the MAGI viewer HTML page"""
@@ -342,8 +460,8 @@ async def get_viewer_page():
             }
             
             body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background: #0a0a0a;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                background: #1a1a1a;
                 color: #ffffff;
                 min-height: 100vh;
                 display: flex;
@@ -351,77 +469,82 @@ async def get_viewer_page():
             }
             
             .header {
-                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-                padding: 20px;
+                background: #2d2d2d;
+                padding: 30px 40px;
                 text-align: center;
-                border-bottom: 2px solid #0f3460;
+                border-bottom: 2px solid #404040;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            
+            .header-logo {
+                max-width: 400px;
+                height: auto;
+                max-height: 120px;
+                object-fit: contain;
+                filter: invert(1);
+            }
+            
+            .header-text {
+                flex: 1;
+                min-width: 200px;
             }
             
             .header h1 {
-                font-size: 2.5em;
-                margin-bottom: 10px;
-                background: linear-gradient(90deg, #00d4ff, #7b2cbf);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
+                font-size: 1.2em;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #ffffff;
+                letter-spacing: 0.5px;
             }
             
             .header p {
-                color: #a0a0a0;
-                font-size: 1.1em;
+                color: #cccccc;
+                font-size: 0.95em;
+                font-weight: 400;
             }
             
             .main-content {
                 flex: 1;
                 display: flex;
-                padding: 20px;
+                padding: 40px;
                 gap: 20px;
             }
             
             .viewer-container {
                 flex: 1;
-                background: #1a1a1a;
-                border-radius: 10px;
-                padding: 20px;
+                background: #2d2d2d;
+                border-radius: 12px;
+                padding: 30px;
                 display: flex;
                 flex-direction: column;
             }
             
-            .video-display {
-                flex: 1;
-                background: #000;
-                border-radius: 5px;
+            .video-info-bar {
                 display: flex;
+                justify-content: space-between;
                 align-items: center;
-                justify-content: center;
-                position: relative;
-                min-height: 400px;
-            }
-            
-            .video-display canvas {
-                max-width: 100%;
-                max-height: 100%;
+                margin-bottom: 10px;
+                padding: 5px 0;
             }
             
             .frame-info {
-                position: absolute;
-                top: 10px;
-                left: 10px;
-                background: rgba(0, 0, 0, 0.7);
-                padding: 10px;
-                border-radius: 5px;
+                background: rgba(0, 0, 0, 0.5);
+                padding: 5px 10px;
+                border-radius: 3px;
                 font-family: monospace;
-                font-size: 14px;
+                font-size: 11px;
+                color: #cccccc;
             }
             
             .cadence-indicator {
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                background: rgba(0, 0, 0, 0.7);
-                padding: 10px;
-                border-radius: 5px;
-                font-size: 24px;
+                background: rgba(0, 0, 0, 0.5);
+                padding: 5px 10px;
+                border-radius: 3px;
+                font-size: 14px;
                 font-weight: bold;
             }
             
@@ -433,6 +556,25 @@ async def get_viewer_page():
                 color: #ff0000;
             }
             
+            .video-display {
+                flex: 1;
+                background: #000;
+                border-radius: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                width: 100%;
+                aspect-ratio: 16/9;
+                max-height: 100%;
+            }
+            
+            .video-display canvas {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+            
             .controls {
                 margin-top: 20px;
                 display: flex;
@@ -441,19 +583,20 @@ async def get_viewer_page():
             }
             
             .control-btn {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: #ffffff;
+                color: #1a1a1a;
                 border: none;
-                padding: 12px 24px;
-                border-radius: 5px;
+                padding: 15px 40px;
+                border-radius: 10px;
                 cursor: pointer;
-                font-size: 16px;
+                font-size: 1.1em;
+                font-weight: 600;
                 transition: all 0.3s ease;
             }
             
-            .control-btn:hover {
+            .control-btn:hover:not(:disabled) {
                 transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+                box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
             }
             
             .control-btn:active {
@@ -461,16 +604,16 @@ async def get_viewer_page():
             }
             
             .control-btn:disabled {
-                background: #555;
+                opacity: 0.5;
                 cursor: not-allowed;
                 transform: none;
             }
             
             .sidebar {
                 width: 300px;
-                background: #1a1a1a;
-                border-radius: 10px;
-                padding: 20px;
+                background: #2d2d2d;
+                border-radius: 12px;
+                padding: 30px;
                 display: flex;
                 flex-direction: column;
                 gap: 20px;
@@ -479,7 +622,8 @@ async def get_viewer_page():
             .sidebar h2 {
                 font-size: 1.5em;
                 margin-bottom: 10px;
-                color: #00d4ff;
+                color: #ffffff;
+                font-weight: 600;
             }
             
             .test-patterns {
@@ -489,18 +633,22 @@ async def get_viewer_page():
             }
             
             .pattern-btn {
-                background: #2d2d2d;
+                background: #3d3d3d;
                 color: white;
-                border: 1px solid #444;
-                padding: 10px;
-                border-radius: 5px;
+                border: 2px solid #505050;
+                padding: 24px 20px;
+                border-radius: 12px;
                 cursor: pointer;
                 transition: all 0.3s ease;
+                font-size: 1em;
+                font-weight: 500;
             }
             
             .pattern-btn:hover {
-                background: #3d3d3d;
-                border-color: #667eea;
+                border-color: #ffffff;
+                background: #4d4d4d;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
             }
             
             .settings {
@@ -530,16 +678,17 @@ async def get_viewer_page():
             }
             
             .stats {
-                background: #2d2d2d;
-                padding: 15px;
-                border-radius: 5px;
-                font-family: monospace;
-                font-size: 14px;
+                background: #4d4d4d;
+                padding: 20px;
+                border-radius: 10px;
+                border: 2px solid #5d5d5d;
             }
             
             .stats h3 {
-                margin-bottom: 10px;
-                color: #00d4ff;
+                margin-bottom: 20px;
+                color: #ffffff;
+                font-size: 1.2em;
+                font-weight: 500;
             }
             
             .stat-item {
@@ -549,22 +698,26 @@ async def get_viewer_page():
             }
             
             .stat-label {
-                color: #a0a0a0;
+                color: #cccccc;
+                font-weight: 500;
             }
             
             .stat-value {
-                color: #00ff00;
+                color: #ffffff;
+                font-weight: 600;
             }
             
             .footer {
-                background: #1a1a1a;
-                padding: 20px;
+                background: #3d3d3d;
+                padding: 30px 20px;
                 text-align: center;
-                border-top: 2px solid #0f3460;
+                color: #cccccc;
+                font-size: 0.9em;
+                border-top: 1px solid #505050;
             }
             
             .footer p {
-                color: #a0a0a0;
+                color: #cccccc;
             }
             
             @media (max-width: 768px) {
@@ -580,18 +733,24 @@ async def get_viewer_page():
     </head>
     <body>
         <div class="header">
-            <h1>MAGI Viewer</h1>
-            <p>High-Frame-Rate 3D Cinema Display - Similar to Blur Busters</p>
+            <img src="/magi-text.png" alt="MAGI Logo" class="header-logo">
+            <div class="header-text">
+                <h1>Viewer</h1>
+                <p>High-Frame-Rate 3D Cinema Display System</p>
+            </div>
         </div>
         
         <div class="main-content">
             <div class="viewer-container">
-                <div class="video-display">
-                    <canvas id="videoCanvas"></canvas>
+                <div class="video-info-bar">
                     <div class="frame-info" id="frameInfo">
                         Frame: 0 | FPS: 120 | Eye: Left
                     </div>
                     <div class="cadence-indicator left" id="cadenceIndicator">L</div>
+                </div>
+                
+                <div class="video-display">
+                    <canvas id="videoCanvas"></canvas>
                 </div>
                 
                 <div class="controls">
@@ -604,6 +763,37 @@ async def get_viewer_page():
             </div>
             
             <div class="sidebar">
+                <div>
+                    <h2>3D Display Mode</h2>
+                    <div class="settings">
+                        <div class="setting-item">
+                            <label>Output Mode</label>
+                            <select id="displayMode">
+                                <option value="stereo" selected>Shutter Glasses (Stereo)</option>
+                                <option value="anaglyph_red_cyan">Anaglyph (Red-Cyan)</option>
+                                <option value="anaglyph_green_magenta">Anaglyph (Green-Magenta)</option>
+                                <option value="anaglyph_amber_blue">Anaglyph (Amber-Blue)</option>
+                                <option value="side_by_side">Side-by-Side</option>
+                                <option value="top_bottom">Top-Bottom</option>
+                                <option value="interleaved">Interleaved (Row/Column)</option>
+                                <option value="checkerboard">Checkerboard</option>
+                                <option value="autostereoscopic">Autostereoscopic (Glasses-Free)</option>
+                                <option value="vr">VR Headset</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label>Eye Swap</label>
+                            <input type="checkbox" id="eyeSwap">
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label>Parallax Adjustment</label>
+                            <input type="range" id="parallax" min="-50" max="50" value="0">
+                        </div>
+                    </div>
+                </div>
+                
                 <div>
                     <h2>Test Patterns</h2>
                     <div class="test-patterns">
@@ -618,6 +808,17 @@ async def get_viewer_page():
                 <div>
                     <h2>Settings</h2>
                     <div class="settings">
+                        <div class="setting-item">
+                            <label>Aspect Ratio</label>
+                            <select id="aspectRatio">
+                                <option value="16/9" selected>16:9 (Standard)</option>
+                                <option value="4/3">4:3 (Classic)</option>
+                                <option value="21/9">21:9 (Ultrawide)</option>
+                                <option value="1/1">1:1 (Square)</option>
+                                <option value="auto">Auto (Match Video)</option>
+                            </select>
+                        </div>
+                        
                         <div class="setting-item">
                             <label>Playback Speed</label>
                             <select id="speedSelect">
@@ -687,6 +888,10 @@ async def get_viewer_page():
             const speedSelect = document.getElementById('speedSelect');
             const showFrameInfo = document.getElementById('showFrameInfo');
             const showCadence = document.getElementById('showCadence');
+            const displayMode = document.getElementById('displayMode');
+            const eyeSwap = document.getElementById('eyeSwap');
+            const parallax = document.getElementById('parallax');
+            const aspectRatio = document.getElementById('aspectRatio');
             
             // Stats elements
             const fpsValue = document.getElementById('fpsValue');
@@ -699,6 +904,9 @@ async def get_viewer_page():
             let currentEye = 'left';
             let isPlaying = false;
             let playbackSpeed = 1.0;
+            let currentDisplayMode = 'stereo';
+            let eyeSwapped = false;
+            let parallaxValue = 0;
             
             // WebSocket message handling
             ws.onmessage = (event) => {
@@ -771,11 +979,39 @@ async def get_viewer_page():
             
             // Display settings
             showFrameInfo.addEventListener('change', (e) => {
-                frameInfo.style.display = e.target.checked ? 'block' : 'none';
+                const infoBar = document.querySelector('.video-info-bar');
+                if (infoBar) {
+                    infoBar.style.display = e.target.checked ? 'flex' : 'none';
+                }
             });
             
             showCadence.addEventListener('change', (e) => {
-                cadenceIndicator.style.display = e.target.checked ? 'block' : 'none';
+                const infoBar = document.querySelector('.video-info-bar');
+                if (infoBar) {
+                    infoBar.style.display = e.target.checked ? 'flex' : 'none';
+                }
+            });
+            
+            // 3D display mode
+            displayMode.addEventListener('change', (e) => {
+                currentDisplayMode = e.target.value;
+                updateDisplayMode();
+            });
+            
+            // Eye swap
+            eyeSwap.addEventListener('change', (e) => {
+                eyeSwapped = e.target.checked;
+                updateDisplayMode();
+            });
+            
+            // Parallax adjustment
+            parallax.addEventListener('input', (e) => {
+                parallaxValue = parseInt(e.target.value);
+            });
+            
+            // Aspect ratio change
+            aspectRatio.addEventListener('change', (e) => {
+                updateAspectRatio(e.target.value);
             });
             
             // Update functions
@@ -792,6 +1028,46 @@ async def get_viewer_page():
                 speedValue.textContent = playbackSpeed.toFixed(1) + 'x';
             }
             
+            function updateDisplayMode() {
+                // Update display mode indicator
+                const modeNames = {
+                    'stereo': 'Shutter Glasses',
+                    'anaglyph_red_cyan': 'Anaglyph (Red-Cyan)',
+                    'anaglyph_green_magenta': 'Anaglyph (Green-Magenta)',
+                    'anaglyph_amber_blue': 'Anaglyph (Amber-Blue)',
+                    'side_by_side': 'Side-by-Side',
+                    'top_bottom': 'Top-Bottom',
+                    'interleaved': 'Interleaved',
+                    'checkerboard': 'Checkerboard',
+                    'autostereoscopic': 'Glasses-Free',
+                    'vr': 'VR Headset'
+                };
+                
+                console.log(`Display mode: ${modeNames[currentDisplayMode] || currentDisplayMode}`);
+                console.log(`Eye swap: ${eyeSwapped ? 'Enabled' : 'Disabled'}`);
+                console.log(`Parallax: ${parallaxValue}`);
+                
+                // Send display mode update to server
+                ws.send(JSON.stringify({
+                    type: 'display_mode',
+                    mode: currentDisplayMode,
+                    eye_swap: eyeSwapped,
+                    parallax: parallaxValue
+                }));
+            }
+            
+            function updateAspectRatio(ratio) {
+                const videoDisplay = document.querySelector('.video-display');
+                
+                if (ratio === 'auto') {
+                    videoDisplay.style.aspectRatio = 'auto';
+                } else {
+                    videoDisplay.style.aspectRatio = ratio;
+                }
+                
+                console.log(`Aspect ratio set to: ${ratio}`);
+            }
+            
             // Initialize canvas size
             function resizeCanvas() {
                 const container = canvas.parentElement;
@@ -801,6 +1077,33 @@ async def get_viewer_page():
             
             window.addEventListener('resize', resizeCanvas);
             resizeCanvas();
+            
+            // Load display info on initialization
+            async function loadDisplayInfo() {
+                try {
+                    const response = await fetch('/viewer/display-info');
+                    const info = await response.json();
+                    
+                    // Update display mode select
+                    displayMode.value = info.display_mode;
+                    currentDisplayMode = info.display_mode;
+                    
+                    // Update eye swap checkbox
+                    eyeSwap.checked = info.eye_swap;
+                    eyeSwapped = info.eye_swap;
+                    
+                    // Update parallax slider
+                    parallax.value = info.parallax;
+                    parallaxValue = info.parallax;
+                    
+                    console.log('Display info loaded:', info);
+                } catch (error) {
+                    console.error('Error loading display info:', error);
+                }
+            }
+            
+            // Load display info on page load
+            loadDisplayInfo();
         </script>
     </body>
     </html>

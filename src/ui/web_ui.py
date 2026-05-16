@@ -18,6 +18,7 @@ from ..core.config import Config
 from ..pipeline.controller import MAGIPipeline
 from .magi_viewer import viewer_router
 from .bino_integration import create_bino_integration
+from ..processing.frame_sync import create_frame_synchronizer, SyncTechnology, SyncMode
 
 
 # Get the static files directory
@@ -60,6 +61,10 @@ class WebUI:
         # Bino3D integration
         self.bino_integration = create_bino_integration()
         
+        # Frame synchronization
+        self.frame_sync = create_frame_synchronizer(target_fps=120.0)
+        self.frame_sync.optimize_for_magi()
+        
         # Setup middleware
         self._setup_middleware()
         
@@ -82,12 +87,12 @@ class WebUI:
     def _setup_routes(self):
         """Setup API routes"""
         
-        # Mount static files
+        # Include viewer router FIRST (before static files)
+        self.app.include_router(viewer_router)
+        
+        # Mount static files LAST (so specific routes take precedence)
         if static_dir.exists():
             self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
-        
-        # Include viewer router
-        self.app.include_router(viewer_router)
         
         @self.app.get("/")
         async def root():
@@ -597,6 +602,125 @@ class WebUI:
             
             except HTTPException:
                 raise
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+        
+        @self.app.get("/api/sync/info")
+        async def get_sync_info():
+            """Get frame synchronization information"""
+            try:
+                display_info = self.frame_sync.get_display_info()
+                frame_stats = self.frame_sync.get_frame_stats()
+                
+                return {
+                    "display": display_info,
+                    "stats": frame_stats,
+                    "technologies": [tech.value for tech in SyncTechnology],
+                    "modes": [mode.value for mode in SyncMode]
+                }
+            
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+        
+        @self.app.post("/api/sync/technology")
+        async def set_sync_technology(request: dict):
+            """Set synchronization technology"""
+            try:
+                technology_str = request.get("technology")
+                
+                try:
+                    technology = SyncTechnology(technology_str)
+                    self.frame_sync.set_sync_technology(technology)
+                    
+                    return {
+                        "status": "success",
+                        "technology": technology.value
+                    }
+                except ValueError:
+                    raise HTTPException(status_code=400, detail=f"Invalid technology: {technology_str}")
+            
+            except HTTPException:
+                raise
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+        
+        @self.app.post("/api/sync/mode")
+        async def set_sync_mode(request: dict):
+            """Set synchronization mode"""
+            try:
+                mode_str = request.get("mode")
+                
+                try:
+                    mode = SyncMode(mode_str)
+                    self.frame_sync.set_sync_mode(mode)
+                    
+                    return {
+                        "status": "success",
+                        "mode": mode.value
+                    }
+                except ValueError:
+                    raise HTTPException(status_code=400, detail=f"Invalid mode: {mode_str}")
+            
+            except HTTPException:
+                raise
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+        
+        @self.app.post("/api/sync/vsync")
+        async def set_vsync(request: dict):
+            """Enable or disable VSync"""
+            try:
+                enabled = request.get("enabled", True)
+                self.frame_sync.enable_vsync(enabled)
+                
+                return {
+                    "status": "success",
+                    "vsync_enabled": enabled
+                }
+            
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+        
+        @self.app.post("/api/sync/adaptive")
+        async def set_adaptive_sync(request: dict):
+            """Enable or disable adaptive sync"""
+            try:
+                enabled = request.get("enabled", True)
+                self.frame_sync.enable_adaptive_sync(enabled)
+                
+                return {
+                    "status": "success",
+                    "adaptive_sync_enabled": enabled
+                }
+            
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+        
+        @self.app.post("/api/sync/optimize")
+        async def optimize_for_magi():
+            """Optimize sync settings for MAGI format"""
+            try:
+                self.frame_sync.optimize_for_magi()
+                
+                return {
+                    "status": "success",
+                    "message": "Optimized for MAGI format (120fps 3D)"
+                }
+            
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+        
+        @self.app.post("/api/sync/reset-stats")
+        async def reset_sync_stats():
+            """Reset frame synchronization statistics"""
+            try:
+                self.frame_sync.reset_stats()
+                
+                return {
+                    "status": "success",
+                    "message": "Statistics reset"
+                }
+            
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
     

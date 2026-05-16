@@ -32,7 +32,7 @@ jobs:
     
     - name: Build with Nuitka
       run: |
-        python build_desktop.py --config build_configs/macos.yaml --nuitka
+        python build_desktop.py --nuitka
     
     - name: Create macOS package
       run: |
@@ -42,24 +42,54 @@ jobs:
           echo "pkgbuild not found. Skipping package creation."
         fi
     
+    - name: Create distribution directory
+      run: |
+        mkdir dist-release
+        cp -r dist/*.app dist-release/ 2>/dev/null || true
+        cp -r dist/*.dmg dist-release/ 2>/dev/null || true
+        cp MAGI-Pipeline.pkg dist-release/ 2>/dev/null || true
+    
     - name: Upload executable
       uses: actions/upload-artifact@v3
       with:
-        name: MAGI-Pipeline-macOS
-        path: |
-          dist/*.app
-          dist/*.dmg
-          MAGI-Pipeline.pkg
-        retention-days: 30
+        name: MAGI-Pipeline-macOS-Executable
+        path: dist-release/
+        retention-days: 90
+    
+    - name: Create Release Summary
+      run: |
+        echo "## 🎬 MAGI Pipeline macOS Build Complete" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📥 Download Instructions" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "1. Go to the **Actions** tab in this repository" >> $GITHUB_STEP_SUMMARY
+        echo "2. Click on the latest **Build macOS Executable** workflow run" >> $GITHUB_STEP_SUMMARY
+        echo "3. Scroll down to the **Artifacts** section" >> $GITHUB_STEP_SUMMARY
+        echo "4. Click on **MAGI-Pipeline-macOS-Executable** to download" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📦 What You'll Get" >> $GITHUB_STEP_SUMMARY
+        echo "- **MAGI Pipeline.app** - macOS application bundle" >> $GITHUB_STEP_SUMMARY
+        echo "- **MAGI-Pipeline.pkg** - macOS installer package" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🚀 How to Use" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download and extract the archive" >> $GITHUB_STEP_SUMMARY
+        echo "2. Double-click **MAGI Pipeline.app** to run" >> $GITHUB_STEP_SUMMARY
+        echo "3. Or install **MAGI-Pipeline.pkg** for system-wide installation" >> $GITHUB_STEP_SUMMARY
+        echo "4. The web UI will open automatically in your browser" >> $GITHUB_STEP_SUMMARY
+        echo "5. Access MAGI Viewer at http://localhost:8000/viewer/viewer" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### ✨ Features" >> $GITHUB_STEP_SUMMARY
+        echo "- Video conversion to MAGI format (120fps 4K 3D)" >> $GITHUB_STEP_SUMMARY
+        echo "- MAGI Viewer with test patterns and 3D display modes" >> $GITHUB_STEP_SUMMARY
+        echo "- Frame synchronization (VSync, G-Sync, FreeSync)" >> $GITHUB_STEP_SUMMARY
+        echo "- Real-time game capture and camera input" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
     
     - name: Create Release (if tagged)
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: |
-          dist/*.app
-          dist/*.dmg
-          MAGI-Pipeline.pkg
+        files: dist-release/
         draft: false
         prerelease: false
       env:

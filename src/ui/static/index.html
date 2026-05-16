@@ -327,6 +327,103 @@
                 </div>
             </section>
 
+            <!-- Frame Synchronization Section -->
+            <section class="config-section">
+                <h2>Frame Synchronization</h2>
+                <p class="section-description">Configure display synchronization for smooth 120fps playback</p>
+                
+                <div class="config-group">
+                    <label for="syncTechnology">Sync Technology</label>
+                    <select id="syncTechnology">
+                        <option value="vsync" selected>VSync (Vertical Sync)</option>
+                        <option value="gsync">G-Sync (NVIDIA)</option>
+                        <option value="freesync">FreeSync (AMD)</option>
+                        <option value="adaptive_sync">Adaptive Sync</option>
+                        <option value="none">None (Unlocked)</option>
+                    </select>
+                </div>
+
+                <div class="config-group">
+                    <label for="syncMode">Sync Mode</label>
+                    <select id="syncMode">
+                        <option value="on" selected>On (Standard)</option>
+                        <option value="adaptive">Adaptive</option>
+                        <option value="fast">Fast Sync</option>
+                        <option value="immediate">Immediate</option>
+                        <option value="off">Off</option>
+                    </select>
+                </div>
+
+                <div class="config-group">
+                    <label>
+                        <input type="checkbox" id="enableVSync" checked>
+                        Enable VSync
+                    </label>
+                </div>
+
+                <div class="config-group">
+                    <label>
+                        <input type="checkbox" id="enableAdaptiveSync">
+                        Enable Adaptive Sync (G-Sync/FreeSync)
+                    </label>
+                </div>
+
+                <div class="sync-controls">
+                    <button id="optimizeSyncBtn" class="btn-secondary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Optimize for MAGI
+                    </button>
+                    <button id="resetSyncStatsBtn" class="btn-secondary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Reset Stats
+                    </button>
+                </div>
+
+                <div class="sync-stats" id="syncStats" style="display: none;">
+                    <h3>Frame Synchronization Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-label">FPS</span>
+                            <span class="stat-value" id="syncFps">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Frame Time</span>
+                            <span class="stat-value" id="syncFrameTime">0ms</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Frame Drops</span>
+                            <span class="stat-value" id="syncFrameDrops">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Sync Errors</span>
+                            <span class="stat-value" id="syncErrors">0</span>
+                        </div>
+                    </div>
+                    <div class="sync-info">
+                        <div class="info-item">
+                            <span class="info-label">Technology:</span>
+                            <span class="info-value" id="syncTechnologyValue">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Mode:</span>
+                            <span class="info-value" id="syncModeValue">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">VSync:</span>
+                            <span class="info-value" id="syncVSyncValue">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Adaptive Sync:</span>
+                            <span class="info-value" id="syncAdaptiveValue">-</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Process Button -->
             <section class="action-section">
                 <button id="processBtn" class="btn-primary" disabled>
@@ -480,7 +577,7 @@
         <footer>
             <div class="footer-links">
                 <a href="/viewer/viewer" class="footer-link">MAGI Viewer</a>
-                <a href="about.html" class="footer-link">About MAGI</a>
+                <a href="/about.html" class="footer-link">About MAGI</a>
             </div>
             <p>MAGI Pipeline v0.1.0 | Converting videos to immersive 3D experiences</p>
         </footer>

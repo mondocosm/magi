@@ -23,29 +23,36 @@ MAGI is a high-frame-rate (HFR) 3D cinema system designed for maximum immersion:
 - **Camera Input**: Support for stereo cameras, depth cameras, and VR cameras
 - **GPU Support**: NVIDIA CUDA, AMD ROCm, Apple Silicon Metal
 - **Cloud Processing**: Optional cloud GPU integration
+- **MAGI Viewer**: Built-in viewer with test patterns and 3D display modes
+- **Frame Synchronization**: VSync, G-Sync, FreeSync support for smooth 120fps playback
+- **Desktop Application**: Standalone executables for Windows, macOS, and Linux
 
 ## 📥 Download Executables
 
-### Windows
+### Quick Download
 1. Go to [GitHub Actions](https://github.com/mondocosm/magi/actions)
-2. Click on the latest "Build Windows Executable" workflow run
+2. Click on the latest workflow run
 3. Scroll down to "Artifacts" section
-4. Download `MAGI-Pipeline-Windows.zip`
-5. Extract and run `MAGI Pipeline.exe`
+4. Download the executable for your platform
+
+### Windows
+- **Artifact**: `MAGI-Pipeline-Windows-Executable`
+- **File**: `MAGI-Pipeline-Windows.exe`
+- **Usage**: Double-click to run, web UI opens automatically
 
 ### macOS
-1. Go to [GitHub Actions](https://github.com/mondocosm/magi/actions)
-2. Click on the latest "Build macOS Executable" workflow run
-3. Scroll down to "Artifacts" section
-4. Download `MAGI-Pipeline-macOS.zip`
-5. Extract and open `MAGI Pipeline.app` or install `MAGI-Pipeline.pkg`
+- **Artifact**: `MAGI-Pipeline-macOS-Executable`
+- **Files**: `MAGI Pipeline.app`, `MAGI-Pipeline.pkg`
+- **Usage**: Double-click the app or install the package
 
 ### Linux
-1. Go to [GitHub Actions](https://github.com/mondocosm/magi/actions)
-2. Click on the latest "Build Linux Executable" workflow run
-3. Scroll down to "Artifacts" section
-4. Download `MAGI-Pipeline-Linux.zip`
-5. Extract and run `MAGI-Pipeline.AppImage` or the binary
+- **Artifact**: `MAGI-Pipeline-Linux-Executable`
+- **Files**: `MAGI-Pipeline-Linux`, `MAGI-Pipeline.AppImage`
+- **Usage**: `chmod +x MAGI-Pipeline-Linux && ./MAGI-Pipeline-Linux`
+
+### All Platforms
+- **Artifact**: `MAGI-Pipeline-All-Platforms`
+- **Usage**: Contains executables for all platforms in one download
 
 ## 🛠️ Installation
 
@@ -69,6 +76,25 @@ Download the appropriate executable for your platform from GitHub Actions (see a
 4. Configure settings (frame rate, resolution, 3D mode)
 5. Click "Convert to MAGI"
 6. Download the converted MAGI file
+
+### Desktop Application
+The desktop application launches the web UI automatically:
+```bash
+# Run the desktop launcher
+python -m src.ui.desktop_launcher
+
+# Or run the built executable
+./MAGI\ Pipeline  # Linux/macOS
+MAGI\ Pipeline.exe  # Windows
+```
+
+### MAGI Viewer
+Access the MAGI Viewer at `http://localhost:8000/viewer/viewer`:
+- Test patterns for 3D display calibration
+- 3D display mode selection (shutter glasses, anaglyph, side-by-side, etc.)
+- Eye swap and parallax adjustment
+- Aspect ratio selector (16:9, 4:3, 21:9, 1:1, Auto)
+- Frame synchronization controls (VSync, G-Sync, FreeSync)
 
 ### Command Line
 ```bash

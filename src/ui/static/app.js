@@ -117,6 +117,23 @@ class MAGIPipelineUI {
         this.resultTime = document.getElementById('resultTime');
         this.downloadBtn = document.getElementById('downloadBtn');
         this.resetBtn = document.getElementById('resetBtn');
+        
+        // Frame synchronization elements
+        this.syncTechnology = document.getElementById('syncTechnology');
+        this.syncMode = document.getElementById('syncMode');
+        this.enableVSync = document.getElementById('enableVSync');
+        this.enableAdaptiveSync = document.getElementById('enableAdaptiveSync');
+        this.optimizeSyncBtn = document.getElementById('optimizeSyncBtn');
+        this.resetSyncStatsBtn = document.getElementById('resetSyncStatsBtn');
+        this.syncStats = document.getElementById('syncStats');
+        this.syncFps = document.getElementById('syncFps');
+        this.syncFrameTime = document.getElementById('syncFrameTime');
+        this.syncFrameDrops = document.getElementById('syncFrameDrops');
+        this.syncErrors = document.getElementById('syncErrors');
+        this.syncTechnologyValue = document.getElementById('syncTechnologyValue');
+        this.syncModeValue = document.getElementById('syncModeValue');
+        this.syncVSyncValue = document.getElementById('syncVSyncValue');
+        this.syncAdaptiveValue = document.getElementById('syncAdaptiveValue');
     }
     
     attachEventListeners() {
@@ -152,6 +169,17 @@ class MAGIPipelineUI {
         // Download and reset buttons
         this.downloadBtn.addEventListener('click', () => this.downloadVideo());
         this.resetBtn.addEventListener('click', () => this.resetUI());
+        
+        // Frame synchronization events
+        this.syncTechnology.addEventListener('change', () => this.handleSyncTechnologyChange());
+        this.syncMode.addEventListener('change', () => this.handleSyncModeChange());
+        this.enableVSync.addEventListener('change', () => this.handleVSyncChange());
+        this.enableAdaptiveSync.addEventListener('change', () => this.handleAdaptiveSyncChange());
+        this.optimizeSyncBtn.addEventListener('click', () => this.optimizeForMAGI());
+        this.resetSyncStatsBtn.addEventListener('click', () => this.resetSyncStats());
+        
+        // Load sync info on initialization
+        this.loadSyncInfo();
     }
     
     switchMode(mode) {
@@ -820,6 +848,200 @@ class MAGIPipelineUI {
         this.processBtn.disabled = false;
         this.btnText.style.display = 'block';
         this.btnLoader.style.display = 'none';
+    }
+    
+    // Frame synchronization methods
+    async loadSyncInfo() {
+        try {
+            const response = await fetch('/api/sync/info');
+            
+            if (!response.ok) {
+                throw new Error('Failed to get sync info');
+            }
+            
+            const data = await response.json();
+            
+            // Update display info
+            if (data.display && data.display.primary_display) {
+                const display = data.display.primary_display;
+                console.log(`Primary display: ${display.name} - ${display.resolution[0]}x${display.resolution[1]} @ ${display.refresh_rate}Hz`);
+            }
+            
+            // Update UI with current sync settings
+            this.updateSyncUI(data.stats);
+            
+        } catch (error) {
+            console.error('Error loading sync info:', error);
+        }
+    }
+    
+    updateSyncUI(stats) {
+        if (!stats) return;
+        
+        // Update sync technology
+        this.syncTechnologyValue.textContent = stats.sync_technology || '-';
+        this.syncModeValue.textContent = stats.sync_mode || '-';
+        this.syncVSyncValue.textContent = stats.vsync_enabled ? 'Enabled' : 'Disabled';
+        this.syncAdaptiveValue.textContent = stats.adaptive_sync_enabled ? 'Enabled' : 'Disabled';
+        
+        // Update statistics
+        this.syncFps.textContent = stats.avg_fps.toFixed(1);
+        this.syncFrameTime.textContent = stats.avg_frame_time.toFixed(2) + 'ms';
+        this.syncFrameDrops.textContent = stats.frame_drops;
+        this.syncErrors.textContent = stats.sync_errors;
+    }
+    
+    async handleSyncTechnologyChange() {
+        try {
+            const response = await fetch('/api/sync/technology', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    technology: this.syncTechnology.value
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to set sync technology');
+            }
+            
+            const result = await response.json();
+            console.log('Sync technology set:', result);
+            
+            // Reload sync info
+            this.loadSyncInfo();
+            
+        } catch (error) {
+            console.error('Error setting sync technology:', error);
+        }
+    }
+    
+    async handleSyncModeChange() {
+        try {
+            const response = await fetch('/api/sync/mode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mode: this.syncMode.value
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to set sync mode');
+            }
+            
+            const result = await response.json();
+            console.log('Sync mode set:', result);
+            
+            // Reload sync info
+            this.loadSyncInfo();
+            
+        } catch (error) {
+            console.error('Error setting sync mode:', error);
+        }
+    }
+    
+    async handleVSyncChange() {
+        try {
+            const response = await fetch('/api/sync/vsync', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    enabled: this.enableVSync.checked
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to set VSync');
+            }
+            
+            const result = await response.json();
+            console.log('VSync set:', result);
+            
+            // Reload sync info
+            this.loadSyncInfo();
+            
+        } catch (error) {
+            console.error('Error setting VSync:', error);
+        }
+    }
+    
+    async handleAdaptiveSyncChange() {
+        try {
+            const response = await fetch('/api/sync/adaptive', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    enabled: this.enableAdaptiveSync.checked
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to set adaptive sync');
+            }
+            
+            const result = await response.json();
+            console.log('Adaptive sync set:', result);
+            
+            // Reload sync info
+            this.loadSyncInfo();
+            
+        } catch (error) {
+            console.error('Error setting adaptive sync:', error);
+        }
+    }
+    
+    async optimizeForMAGI() {
+        try {
+            const response = await fetch('/api/sync/optimize', {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to optimize for MAGI');
+            }
+            
+            const result = await response.json();
+            console.log('Optimized for MAGI:', result);
+            
+            // Show sync stats
+            this.syncStats.style.display = 'block';
+            
+            // Reload sync info
+            this.loadSyncInfo();
+            
+        } catch (error) {
+            console.error('Error optimizing for MAGI:', error);
+        }
+    }
+    
+    async resetSyncStats() {
+        try {
+            const response = await fetch('/api/sync/reset-stats', {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to reset sync stats');
+            }
+            
+            const result = await response.json();
+            console.log('Sync stats reset:', result);
+            
+            // Reload sync info
+            this.loadSyncInfo();
+            
+        } catch (error) {
+            console.error('Error resetting sync stats:', error);
+        }
     }
 }
 

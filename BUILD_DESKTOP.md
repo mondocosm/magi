@@ -2,6 +2,18 @@
 
 This guide explains how to build desktop application binaries for MAGI Pipeline on Windows, macOS, and Linux.
 
+## Overview
+
+MAGI Pipeline provides a web-based desktop application that launches the web UI in a browser or native window. The desktop application includes all recent MAGI Viewer updates:
+
+- **Frame Info & Cadence Indicator**: Positioned above video window with smaller text
+- **MAGI Logo**: Consistent branding across all pages
+- **3D Display Modes**: Shutter glasses, anaglyph (Red-Cyan, Green-Magenta, Amber-Blue), side-by-side, top-bottom, interleaved, checkerboard, autostereoscopic (glasses-free), VR headset
+- **Eye Swap & Parallax Adjustment**: Fine-tune 3D viewing experience
+- **Aspect Ratio Selector**: 16:9, 4:3, 21:9, 1:1, Auto
+- **Enhanced Test Patterns**: Better error handling and logging
+- **Frame Synchronization**: VSync, G-Sync, FreeSync support for smooth 120fps playback
+
 ## Quick Start
 
 ```bash
@@ -10,6 +22,26 @@ python build_desktop.py --nuitka
 
 # Or build with PyInstaller (faster build, slightly less performance)
 python build_desktop.py
+```
+
+## Desktop Launcher
+
+The desktop application uses [`src/ui/desktop_launcher.py`](src/ui/desktop_launcher.py) to launch the web UI. This provides:
+
+- **Automatic browser opening**: Launches the web UI in your default browser
+- **Standalone operation**: Runs as a native desktop application
+- **Web UI access**: Full access to all MAGI Pipeline features including:
+  - Video processing pipeline
+  - MAGI Viewer with test patterns
+  - Frame synchronization controls
+  - 3D display mode options
+  - Real-time statistics
+
+**Command-line options:**
+```bash
+python -m src.ui.desktop_launcher --host 127.0.0.1 --port 8000
+python -m src.ui.desktop_launcher --no-browser  # Don't open browser
+python -m src.ui.desktop_launcher --debug  # Enable debug mode
 ```
 
 ## Build Methods
@@ -69,8 +101,17 @@ python build_desktop.py --nuitka
 ```
 
 **Output:**
-- `dist/MAGI Pipeline.exe` - Standalone executable
+- `dist/MAGI Pipeline.exe` - Standalone executable (launches web UI)
 - `installer.exe` - Windows installer (if NSIS is installed)
+
+**Usage:**
+```bash
+# Run the desktop application
+./dist/MAGI\ Pipeline.exe
+
+# The web UI will open in your default browser at http://127.0.0.1:8000
+# Access MAGI Viewer at http://127.0.0.1:8000/viewer/viewer
+```
 
 ### macOS
 
@@ -90,8 +131,17 @@ python build_desktop.py --nuitka
 ```
 
 **Output:**
-- `dist/MAGI Pipeline.app` - macOS application bundle
+- `dist/MAGI Pipeline.app` - macOS application bundle (launches web UI)
 - `MAGI-Pipeline.pkg` - macOS installer (if pkgbuild is available)
+
+**Usage:**
+```bash
+# Run the desktop application
+open dist/MAGI\ Pipeline.app
+
+# The web UI will open in your default browser at http://127.0.0.1:8000
+# Access MAGI Viewer at http://127.0.0.1:8000/viewer/viewer
+```
 
 ### Linux
 
@@ -118,8 +168,20 @@ python build_desktop.py --nuitka
 ```
 
 **Output:**
-- `dist/MAGI Pipeline` - Linux executable
+- `dist/MAGI Pipeline` - Linux executable (launches web UI)
 - `MAGI-Pipeline.AppImage` - AppImage (if appimagetool is installed)
+
+**Usage:**
+```bash
+# Run the desktop application
+./dist/MAGI\ Pipeline
+
+# The web UI will open in your default browser at http://127.0.0.1:8000
+# Access MAGI Viewer at http://127.0.0.1:8000/viewer/viewer
+
+# Or run the AppImage
+./MAGI-Pipeline.AppImage
+```
 
 ## Advanced Options
 
@@ -223,47 +285,34 @@ pip install <module_name>
 
 ## Automated Builds
 
-You can set up GitHub Actions to automatically build desktop applications:
+GitHub Actions workflows are set up to automatically build desktop applications:
 
-```yaml
-# .github/workflows/build-desktop.yml
-name: Build Desktop Apps
+### Available Workflows
 
-on:
-  push:
-    tags:
-      - 'v*'
+1. **Build Windows Executable** - Builds Windows executable
+2. **Build macOS Executable** - Builds macOS app bundle and package
+3. **Build Linux Executable** - Builds Linux binary and AppImage
+4. **Build All Platforms** - Builds all platforms in one workflow
 
-jobs:
-  build:
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-    
-    runs-on: ${{ matrix.os }}
-    
-    steps:
-      - uses: actions/checkout@v2
-      
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-      
-      - name: Install dependencies
-        run: |
-          pip install nuitka pyinstaller
-          pip install -r requirements.txt
-      
-      - name: Build desktop app
-        run: python build_desktop.py --nuitka
-      
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: magi-pipeline-${{ matrix.os }}
-          path: dist/
-```
+### Downloading Executables
+
+1. Go to [GitHub Actions](https://github.com/mondocosm/magi/actions)
+2. Click on the latest workflow run
+3. Scroll down to the **Artifacts** section
+4. Download the executable for your platform
+
+### Artifact Names
+
+- **Windows**: `MAGI-Pipeline-Windows-Executable`
+- **macOS**: `MAGI-Pipeline-macOS-Executable`
+- **Linux**: `MAGI-Pipeline-Linux-Executable`
+- **All Platforms**: `MAGI-Pipeline-All-Platforms`
+
+### Workflow Triggers
+
+- **Automatic**: Runs on push to `master` or `main` branches
+- **Manual**: Can be triggered manually from the Actions tab
+- **Releases**: Creates GitHub releases when tags are pushed (v*)
 
 ## Support
 

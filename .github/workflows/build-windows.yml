@@ -27,51 +27,45 @@ jobs:
       run: |
         pip install fastapi uvicorn python-multipart numpy opencv-python
     
-    - name: Create entry point script
-      run: |
-        echo import sys > magi_pipeline.py
-        echo import os >> magi_pipeline.py
-        echo. >> magi_pipeline.py
-        echo sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src')) >> magi_pipeline.py
-        echo. >> magi_pipeline.py
-        echo from src.ui.web_ui import create_web_ui >> magi_pipeline.py
-        echo. >> magi_pipeline.py
-        echo if __name__ == '__main__': >> magi_pipeline.py
-        echo     web_ui = create_web_ui() >> magi_pipeline.py
-        echo     web_ui.run(host='0.0.0.0', port=8000) >> magi_pipeline.py
-    
     - name: Build with PyInstaller
       run: |
-        pyinstaller --onefile --name "MAGI-Pipeline" magi_pipeline.py
+        pyinstaller --onefile --name "MAGI-Pipeline" --add-data "src/ui/static;src/ui/static" src/ui/desktop_launcher.py
     
     - name: Create distribution directory
       run: |
-        mkdir dist
-        copy dist\MAGI-Pipeline.exe dist\MAGI-Pipeline-Windows.exe
+        mkdir dist-release
+        copy dist\MAGI-Pipeline.exe dist-release\MAGI-Pipeline-Windows.exe
     
     - name: Upload executable
       uses: actions/upload-artifact@v3
       with:
-        name: MAGI-Pipeline-Windows
-        path: dist/MAGI-Pipeline-Windows.exe
+        name: MAGI-Pipeline-Windows-Executable
+        path: dist-release/MAGI-Pipeline-Windows.exe
         retention-days: 90
     
     - name: Create Release Summary
       run: |
-        echo "## Build Complete" >> $env:GITHUB_STEP_SUMMARY
+        echo "## 🎬 MAGI Pipeline Windows Build Complete" >> $env:GITHUB_STEP_SUMMARY
         echo "" >> $env:GITHUB_STEP_SUMMARY
-        echo "### Download Instructions" >> $env:GITHUB_STEP_SUMMARY
+        echo "### 📥 Download Instructions" >> $env:GITHUB_STEP_SUMMARY
         echo "" >> $env:GITHUB_STEP_SUMMARY
         echo "1. Go to the **Actions** tab in this repository" >> $env:GITHUB_STEP_SUMMARY
         echo "2. Click on the latest **Build Windows Executable** workflow run" >> $env:GITHUB_STEP_SUMMARY
         echo "3. Scroll down to the **Artifacts** section" >> $env:GITHUB_STEP_SUMMARY
-        echo "4. Click on **MAGI-Pipeline-Windows** to download" >> $env:GITHUB_STEP_SUMMARY
+        echo "4. Click on **MAGI-Pipeline-Windows-Executable** to download" >> $env:GITHUB_STEP_SUMMARY
         echo "" >> $env:GITHUB_STEP_SUMMARY
-        echo "### What You'll Get" >> $env:GITHUB_STEP_SUMMARY
+        echo "### 📦 What You'll Get" >> $env:GITHUB_STEP_SUMMARY
         echo "- **MAGI-Pipeline-Windows.exe** - Standalone Windows executable" >> $env:GITHUB_STEP_SUMMARY
         echo "" >> $env:GITHUB_STEP_SUMMARY
-        echo "### How to Use" >> $env:GITHUB_STEP_SUMMARY
+        echo "### 🚀 How to Use" >> $env:GITHUB_STEP_SUMMARY
         echo "1. Download the executable" >> $env:GITHUB_STEP_SUMMARY
         echo "2. Double-click to run" >> $env:GITHUB_STEP_SUMMARY
-        echo "3. Open your browser to http://localhost:8000" >> $env:GITHUB_STEP_SUMMARY
+        echo "3. The web UI will open automatically in your browser" >> $env:GITHUB_STEP_SUMMARY
+        echo "4. Access MAGI Viewer at http://localhost:8000/viewer/viewer" >> $env:GITHUB_STEP_SUMMARY
+        echo "" >> $env:GITHUB_STEP_SUMMARY
+        echo "### ✨ Features" >> $env:GITHUB_STEP_SUMMARY
+        echo "- Video conversion to MAGI format (120fps 4K 3D)" >> $env:GITHUB_STEP_SUMMARY
+        echo "- MAGI Viewer with test patterns and 3D display modes" >> $env:GITHUB_STEP_SUMMARY
+        echo "- Frame synchronization (VSync, G-Sync, FreeSync)" >> $env:GITHUB_STEP_SUMMARY
+        echo "- Real-time game capture and camera input" >> $env:GITHUB_STEP_SUMMARY
         echo "" >> $env:GITHUB_STEP_SUMMARY

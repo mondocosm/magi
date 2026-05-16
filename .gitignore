@@ -82,6 +82,7 @@ cache/
 bino/build/
 Waifu2x-Extension-GUI/SRC_v3.41.01-beta/Waifu2x-Extension-QT/Makefile
 Waifu2x-Extension-GUI/SRC_v3.41.01-beta/Waifu2x-Extension-QT/*.o
+tauri/
 
 # Environment variables
 .env

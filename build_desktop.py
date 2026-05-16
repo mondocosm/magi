@@ -94,7 +94,7 @@ def build_with_nuitka(config=None):
         "--enable-plugin=pylint-warnings",
         "--follow-imports",
         "--output-dir=dist",
-        "src/cli.py",
+        "src/ui/desktop_launcher.py",
     ]
     
     # Use config settings if available
@@ -166,7 +166,7 @@ def build_with_pyinstaller(config=None):
 block_cipher = None
 
 a = Analysis(
-    ['src/cli.py'],
+    ['src/ui/desktop_launcher.py'],
     pathex=[],
     binaries=[],
     datas=[
@@ -185,6 +185,10 @@ a = Analysis(
         'src.processing.upscaling',
         'src.processing.frame_cadence',
         'src.output.magi_encoder',
+        'src.ui.web_ui',
+        'src.ui.magi_viewer',
+        'src.ui.bino_integration',
+        'src.processing.frame_sync',
     ],
     hookspath=[],
     hooksconfig={},
